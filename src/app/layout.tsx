@@ -6,8 +6,11 @@ import { Geist } from "next/font/google";
 
 import { cookies } from "next/headers";
 import "reflect-metadata";
+import { DEFAULT_APP_THEME } from "~/constants/constants";
+import RootLayout from "~/features/root/layout";
 import ThemeProvider from "~/providers/Theme.Provider";
 import { TRPCReactProvider } from "~/trpc/react";
+import type { AppTheme } from "~/types/types";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -20,18 +23,20 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default async function RootLayout({
+export default async function RootAppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const cookie = await cookies();
   const theme =
-    (cookie.get("theme")?.value as ("dark" | "light") | null) ?? "light";
+    (cookie.get("theme")?.value as AppTheme | null) ?? DEFAULT_APP_THEME;
   return (
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <AntdRegistry>
           <TRPCReactProvider>
-            <ThemeProvider theme={theme}>{children}</ThemeProvider>
+            <ThemeProvider theme={theme}>
+              <RootLayout>{children}</RootLayout>
+            </ThemeProvider>
           </TRPCReactProvider>
         </AntdRegistry>
       </body>
