@@ -1,0 +1,26 @@
+.ticker {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+.ticker-label {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.ticker__track {
+  display: inline-block;
+  animation: scroll 200s linear infinite;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(-20%);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
