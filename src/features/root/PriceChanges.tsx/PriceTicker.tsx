@@ -5,7 +5,6 @@ import { api } from "~/trpc/react";
 
 export default function PriceTicker() {
   const { data: prices = [], isFetching } = api.overview.getPrices.useQuery();
-  console.log(prices);
   return (
     <div className="ticker">
       <label className="ticker-label">24h:</label>

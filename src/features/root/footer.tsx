@@ -1,6 +1,6 @@
 "use client";
 import { Layout } from "antd";
-import PriceTicker from "./PriceTicker/PriceTicker";
+import PriceTicker from "./PriceChanges.tsx/PriceTicker";
 
 const { Footer } = Layout;
 
