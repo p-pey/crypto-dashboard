@@ -12,7 +12,7 @@ export const EtfRouter = createTRPCRouter({
     return Promise.all(
       EtfList.getAllBtcEtf().map(async (etf) => {
         const response = await axios.get(
-          `https://query1.finance.yahoo.com/v8/finance/chart/${etf}`,
+          `https://query1.finance.yahoo.com/v8/finance/chart/${etf.id}`,
         );
         return { etf, data: response.data };
       }),

@@ -1,0 +1,111 @@
+{
+  "BTC": [
+    { "id": "GBTC", "name": "Grayscale Bitcoin" },
+    { "id": "IBTC", "name": "iShares Bitcoin Trust" },
+    { "id": "FBTC", "name": "Fidelity Wise Origin Bitcoin Fund" },
+    { "id": "BTC", "name": "Grayscale Bitcoin Mini Trust ETF" },
+    { "id": "BITB", "name": "Bitwise Bitcoin ETF" },
+    { "id": "ARKB", "name": "ARK 21Shares Bitcoin ETF" },
+    { "id": "BITO", "name": "ProShares Bitcoin ETF" },
+    { "id": "HODL", "name": "VanEck Bitcoin ETF" },
+    { "id": "BTCO", "name": "Invesco Galaxy Bitcoin ETF" },
+    { "id": "EZBC", "name": "Franklin Bitcoin ETF" },
+    {
+      "id": "BRRR",
+      "name": "Coinshares Bitcoin ETF Common Shares of Beneficial Interest"
+    },
+    {
+      "id": "BTCW",
+      "name": "WisdomTree Bitcoin Fund"
+    },
+    {
+      "id": "BITS",
+      "name": "Global X Blockchain & Bitcoin Strategy ETF"
+    },
+    {
+      "id": "ARKA",
+      "name": "ARK 21Shares Active Bitcoin Futures Strategy ETF"
+    },
+    {
+      "id": "DEFI",
+      "name": "Hashdex Bitcoin ETF"
+    },
+    {
+      "id": "BITC",
+      "name": "Bitwise Trendwise Bitcoin and Treasuries Rotation Strategy ETF"
+    },
+    {
+      "id": "ARKC",
+      "name": "ARK 21Shares Active On-Chain Bitcoin Strategy ETF"
+    },
+    {
+      "id": "CHINAAMC",
+      "name": "ChinaAMC Bitcoin ETF"
+    },
+    {
+      "id": "HARVEST",
+      "name": "Harvest Bitcoin Spot ETF"
+    },
+    {
+      "id": "BOSERA&HASHKE",
+      "name": "Bosera HashKey Bitcoin ETF"
+    }
+  ],
+  "ETH": [
+    {
+      "id": "ETHA",
+      "name": "iShares Ethereum Trust ETF"
+    },
+    {
+      "id": "ETHE",
+      "name": "Grayscale Ethereum Trust ETF"
+    },
+    {
+      "id": "FETH",
+      "name": "Fidelity Ethereum Fund"
+    },
+    {
+      "id": "ETH",
+      "name": "Grayscale Ethereum Mini Trust ETF"
+    },
+    {
+      "id": "ETHW",
+      "name": "Bitwise Ethereum ETF"
+    },
+    {
+      "id": "ETHV",
+      "name": "VanEck Ethereum ETF"
+    },
+    {
+      "id": "EZET",
+      "name": "Franklin Ethereum ETF"
+    },
+    {
+      "id": "EETH",
+      "name": "ProShares Ether ETF"
+    },
+    {
+      "id": "QETH",
+      "name": "Invesco Galaxy Ethereum ETF"
+    },
+    {
+      "id": "CETH",
+      "name": "21Shares Core Ethereum ETF"
+    },
+    {
+      "id": "FUT",
+      "name": "VanEck Ethereum Strategy ETF"
+    },
+    {
+      "id": "ARKZ",
+      "name": "ARK 21Shares Active Ethereum Futures Strategy ETF"
+    },
+    {
+      "id": "AETH",
+      "name": "Bitwise Trendwise Ether and Treasuries Rotation Strategy ETF"
+    }
+  ],
+  "SOL": [],
+  "XRP": [],
+  "DOGE": []
+}

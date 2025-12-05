@@ -4,58 +4,7 @@ type TEtf = {
 };
 
 export class Etf {
-  private readonly BTC_ETFS: TEtf[] = [
-    { id: "GBTC", name: "Grayscale Bitcoin" },
-    { id: "IBTC", name: "iShares Bitcoin Trust" },
-    { id: "FBTC", name: "Fidelity Wise Origin Bitcoin Fund" },
-    { id: "BTC", name: "Grayscale Bitcoin Mini Trust ETF" },
-    { id: "BITB", name: "Bitwise Bitcoin ETF" },
-    { id: "ARKB", name: "ARK 21Shares Bitcoin ETF" },
-    { id: "BITO", name: "ProShares Bitcoin ETF" },
-    { id: "HODL", name: "VanEck Bitcoin ETF" },
-    { id: "BTCO", name: "Invesco Galaxy Bitcoin ETF" },
-    { id: "EZBC", name: "Franklin Bitcoin ETF" },
-    {
-      id: "BRRR",
-      name: "Coinshares Bitcoin ETF Common Shares of Beneficial Interest",
-    },
-    {
-      id: "BTCW",
-      name: "WisdomTree Bitcoin Fund",
-    },
-    {
-      id: "BITS",
-      name: "Global X Blockchain & Bitcoin Strategy ETF",
-    },
-    {
-      id: "ARKA",
-      name: "ARK 21Shares Active Bitcoin Futures Strategy ETF",
-    },
-    {
-      id: "DEFI",
-      name: "Hashdex Bitcoin ETF",
-    },
-    {
-      id: "BITC",
-      name: "Bitwise Trendwise Bitcoin and Treasuries Rotation Strategy ETF",
-    },
-    {
-      id: "ARKC",
-      name: "ARK 21Shares Active On-Chain Bitcoin Strategy ETF",
-    },
-    {
-      id: "CHINAAMC",
-      name: "ChinaAMC Bitcoin ETF",
-    },
-    {
-      id: "HARVEST",
-      name: "Harvest Bitcoin Spot ETF",
-    },
-    {
-      id: "BOSERA&HASHKE",
-      name: "Bosera HashKey Bitcoin ETF",
-    },
-  ] as const;
+  private readonly BTC_ETFS: TEtf[] = [];
   private readonly ETH_ETFS: TEtf[] = [
     {
       id: "ETHA",
@@ -114,6 +63,13 @@ export class Etf {
   private readonly XRP_ETFS: TEtf[] = [];
   private readonly DOGE_ETFS: TEtf[] = [];
 
+  constructor() {
+    this.BTC_ETFS = require("./etf.json").BTC;
+    this.ETH_ETFS = require("./etf.json").ETH;
+    this.SOL_ETFS = require("./etf.json").SOL;
+    this.XRP_ETFS = require("./etf.json").XRP;
+    this.DOGE_ETFS = require("./etf.json").DOGE;
+  }
   public getAll() {
     return [
       ...this.BTC_ETFS,
