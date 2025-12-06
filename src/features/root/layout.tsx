@@ -17,6 +17,7 @@ export default function RootLayout(props: PropsWithChildren) {
             <Layout>
               <Header />
               <Content
+                  className="!overflow-y-auto"
                 style={{ margin: "16px", padding: "16px", background: "#fff" }}
               >
                 {props.children}

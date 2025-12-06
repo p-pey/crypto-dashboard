@@ -6,15 +6,18 @@ import {
   BarChartOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
+import type {ItemType, MenuItemType} from "antd/es/menu/interface";
+import {useRouter} from "next/navigation";
 
-const items = [
-  { key: "1", icon: <PieChartOutlined />, label: "Dashboard" },
-  { key: "2", icon: <LineChartOutlined />, label: "ETFs" },
-  { key: "3", icon: <BarChartOutlined />, label: "Liquidity" },
-  { key: "4", icon: <SettingOutlined />, label: "Settings" },
-];
+``
 
 export default function AppSidebar() {
+    const navigate = useRouter();
+    const items: ItemType<MenuItemType>[] = [
+        { key: "1", icon: <PieChartOutlined />, label: "Dashboard", onClick:()=> navigate.push("/")  },
+        { key: "2", icon: <LineChartOutlined />, label: "ETFs", onClick:()=> navigate.push("/etfs")  },
+        { key: "3", icon: <BarChartOutlined />, label: "Liquidity", onClick: ()=> navigate.push("/liquidity")  },
+    ];
   return (
     <div style={{ height: "100%", background: "#001529" }}>
       <div

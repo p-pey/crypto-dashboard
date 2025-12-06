@@ -1,7 +1,6 @@
 {
   "BTC": [
     { "id": "GBTC", "name": "Grayscale Bitcoin" },
-    { "id": "IBTC", "name": "iShares Bitcoin Trust" },
     { "id": "FBTC", "name": "Fidelity Wise Origin Bitcoin Fund" },
     { "id": "BTC", "name": "Grayscale Bitcoin Mini Trust ETF" },
     { "id": "BITB", "name": "Bitwise Bitcoin ETF" },
@@ -37,18 +36,6 @@
     {
       "id": "ARKC",
       "name": "ARK 21Shares Active On-Chain Bitcoin Strategy ETF"
-    },
-    {
-      "id": "CHINAAMC",
-      "name": "ChinaAMC Bitcoin ETF"
-    },
-    {
-      "id": "HARVEST",
-      "name": "Harvest Bitcoin Spot ETF"
-    },
-    {
-      "id": "BOSERA&HASHKE",
-      "name": "Bosera HashKey Bitcoin ETF"
     }
   ],
   "ETH": [
