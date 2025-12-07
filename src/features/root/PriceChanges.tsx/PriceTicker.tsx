@@ -1,18 +1,13 @@
-"use client";
-import { useQuery } from "@tanstack/react-query";
 import "./PriceTicker.css";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
 
-export default function PriceTicker() {
-  const { data: prices = [], isFetching } = api.overview.getPrices.useQuery();
+export default async function PriceTicker() {
+  const prices = await api.overview.getPrices();
   return (
     <div className="ticker">
       <label className="ticker-label">24h:</label>
       <div className="ticker__track">
-        {isFetching && prices.length === 0 ? (
-          <span style={{ color: "#ccc" }}>Loading prices...</span>
-        ) : (
-          prices.map((coin, i) => (
+       {   prices.map((coin, i) => (
             <span
               key={i}
               style={{
@@ -25,8 +20,8 @@ export default function PriceTicker() {
               {coin.symbol.toUpperCase()}:{" "}
               {coin.priceChangePercentage24h.toFixed(2)}%
             </span>
-          ))
-        )}
+          ))}
+
       </div>
     </div>
   );

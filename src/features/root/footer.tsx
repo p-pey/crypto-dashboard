@@ -1,10 +1,9 @@
-"use client";
 import { Layout } from "antd";
 import PriceTicker from "./PriceChanges.tsx/PriceTicker";
 
-const { Footer } = Layout;
 
-export default function AppFooter() {
+export default async function AppFooter() {
+const { Footer } = Layout;
   return (
     <Footer
         className="fixed bottom-0 left-0 w-full"
