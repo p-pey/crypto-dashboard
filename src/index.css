@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+
+@layer base {
+    :root {
+        --background: 222 47% 6%;
+        --foreground: 210 40% 98%;
+
+        --card: 222 47% 8%;
+        --card-foreground: 210 40% 98%;
+
+        --popover: 222 47% 10%;
+        --popover-foreground: 210 40% 98%;
+
+        --primary: 158 64% 43%;
+        --primary-foreground: 222 47% 6%;
+
+        --secondary: 222 47% 12%;
+        --secondary-foreground: 210 40% 98%;
+
+        --muted: 222 47% 15%;
+        --muted-foreground: 215 20% 55%;
+
+        --accent: 222 47% 18%;
+        --accent-foreground: 210 40% 98%;
+
+        --destructive: 356 75% 57%;
+        --destructive-foreground: 210 40% 98%;
+
+        --success: 158 64% 43%;
+        --success-foreground: 222 47% 6%;
+
+        --warning: 38 92% 50%;
+        --warning-foreground: 222 47% 6%;
+
+        --border: 222 47% 18%;
+        --input: 222 47% 15%;
+        --ring: 158 64% 43%;
+
+        --radius: 0.5rem;
+
+        /* Custom CMC-style colors */
+        --gain: 158 64% 43%;
+        --loss: 356 75% 57%;
+        --chart-1: 158 64% 43%;
+        --chart-2: 199 89% 48%;
+        --chart-3: 280 65% 60%;
+        --chart-4: 38 92% 50%;
+        --chart-5: 356 75% 57%;
+
+        /* Gradients */
+        --gradient-primary: linear-gradient(
+            135deg,
+            hsl(158 64% 43%),
+            hsl(199 89% 48%)
+        );
+        --gradient-card: linear-gradient(
+            180deg,
+            hsl(222 47% 10%),
+            hsl(222 47% 8%)
+        );
+        --gradient-hero: linear-gradient(
+            135deg,
+            hsl(222 47% 8%) 0%,
+            hsl(222 47% 12%) 100%
+        );
+
+        /* Shadows */
+        --shadow-card: 0 4px 24px -4px hsl(222 47% 4% / 0.5);
+        --shadow-glow: 0 0 40px hsl(158 64% 43% / 0.15);
+
+        --sidebar-background: 222 47% 8%;
+        --sidebar-foreground: 210 40% 98%;
+        --sidebar-primary: 158 64% 43%;
+        --sidebar-primary-foreground: 222 47% 6%;
+        --sidebar-accent: 222 47% 15%;
+        --sidebar-accent-foreground: 210 40% 98%;
+        --sidebar-border: 222 47% 18%;
+        --sidebar-ring: 158 64% 43%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground font-sans antialiased;
+        font-family: "IBM Plex Sans", sans-serif;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: hsl(var(--background));
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: hsl(var(--muted));
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--muted-foreground));
+    }
+}
+
+@layer utilities {
+    .text-gain {
+        color: hsl(var(--gain));
+    }
+
+    .text-loss {
+        color: hsl(var(--loss));
+    }
+
+    .bg-gain {
+        background-color: hsl(var(--gain));
+    }
+
+    .bg-loss {
+        background-color: hsl(var(--loss));
+    }
+
+    .gradient-primary {
+        background: var(--gradient-primary);
+    }
+
+    .gradient-card {
+        background: var(--gradient-card);
+    }
+
+    .gradient-hero {
+        background: var(--gradient-hero);
+    }
+
+    .shadow-card {
+        box-shadow: var(--shadow-card);
+    }
+
+    .shadow-glow {
+        box-shadow: var(--shadow-glow);
+    }
+
+    .animate-pulse-slow {
+        animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+}
+
+/* Ant Design Dark Theme Overrides */
+.ant-table {
+    background: transparent !important;
+}
+
+.ant-table-thead > tr > th {
+    background: hsl(222 47% 10%) !important;
+    color: hsl(215 20% 55%) !important;
+    border-bottom: 1px solid hsl(222 47% 18%) !important;
+    font-weight: 500 !important;
+}
+
+.ant-table-tbody > tr > td {
+    background: transparent !important;
+    border-bottom: 1px solid hsl(222 47% 12%) !important;
+    color: hsl(210 40% 98%) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+    background: hsl(222 47% 12%) !important;
+}
+
+.ant-table-wrapper .ant-table-pagination.ant-pagination {
+    margin: 16px 0;
+}
+
+.ant-pagination .ant-pagination-item {
+    background: hsl(222 47% 12%) !important;
+    border-color: hsl(222 47% 18%) !important;
+}
+
+.ant-pagination .ant-pagination-item a {
+    color: hsl(210 40% 98%) !important;
+}
+
+.ant-pagination .ant-pagination-item-active {
+    background: hsl(158 64% 43%) !important;
+    border-color: hsl(158 64% 43%) !important;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+    color: hsl(222 47% 6%) !important;
+}
+
+.ant-input {
+    background: hsl(222 47% 12%) !important;
+    border-color: hsl(222 47% 18%) !important;
+    color: hsl(210 40% 98%) !important;
+}
+
+.ant-input::placeholder {
+    color: hsl(215 20% 55%) !important;
+}
+
+.ant-input:hover,
+.ant-input:focus {
+    border-color: hsl(158 64% 43%) !important;
+}
+
+.ant-select-selector {
+    background: hsl(222 47% 12%) !important;
+    border-color: hsl(222 47% 18%) !important;
+    color: hsl(210 40% 98%) !important;
+}
+
+.ant-select-dropdown {
+    background: hsl(222 47% 10%) !important;
+}
+
+.ant-select-item {
+    color: hsl(210 40% 98%) !important;
+}
+
+.ant-select-item-option-active {
+    background: hsl(222 47% 15%) !important;
+}
+
+.ant-select-item-option-selected {
+    background: hsl(158 64% 43% / 0.2) !important;
+}
