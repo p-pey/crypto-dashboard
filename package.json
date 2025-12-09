@@ -38,7 +38,6 @@
     "server-only": "^0.0.1",
     "superjson": "^2.2.1",
     "swr": "^2.3.6",
-    "tailwindcss": "^4.1.17",
     "tsyringe": "^4.10.0",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"
