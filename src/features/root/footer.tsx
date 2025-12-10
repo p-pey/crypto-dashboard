@@ -1,5 +1,3 @@
-import { Layout } from "antd";
-import PriceTicker from "./PriceChanges.tsx/PriceTicker";
 import { Footer } from "antd/lib/layout/layout";
 
 export default async function AppFooter() {
@@ -13,7 +11,7 @@ export default async function AppFooter() {
         overflow: "hidden",
       }}
     >
-      <PriceTicker />
+      {/* <PriceTicker /> */}
     </Footer>
   );
 }

@@ -3,6 +3,12 @@ import type { Themes } from "~/constants/constants";
 export type AppTheme = keyof typeof Themes;
 
 export type Coin = {
+  symbol: string;
+  price: string;
+}
+
+export type CoinLive = {
+  price: string;
   ath: number;
   ath_change_percentage: number;
   ath_date: string;

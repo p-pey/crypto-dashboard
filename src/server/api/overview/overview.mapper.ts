@@ -1,14 +1,17 @@
 import type { Coin } from "~/types/types";
 
 export class OverviewMapper {
+  static mapCoinToGetUSDTPairs(coins: Coin[]) {
+    return coins.filter(coin => coin.symbol.endsWith("USDT"));
+  }
   static mapCoinsTo24Changes(coins: Coin[]) {
+    console.log(coins);
     return coins.map((coin) => {
       return {
-        sparkline: coin.sparkline_in_7d.price,
-        priceChangePercentage24h: coin.price_change_percentage_24h,
-        id: coin.id,
-        name: coin.name,
+        id: coin.symbol,
+        name: coin.symbol,
         symbol: coin.symbol,
+        price: coin.price
       };
     });
   }

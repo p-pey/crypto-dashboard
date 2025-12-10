@@ -3,9 +3,9 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from "axios";
-import { singleton } from "tsyringe";
+import { AppSignleton } from "./container";
 
-@singleton()
+@AppSignleton()
 class AxiosService {
   private client: AxiosInstance;
 
