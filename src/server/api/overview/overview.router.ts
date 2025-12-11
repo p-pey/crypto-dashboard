@@ -2,6 +2,7 @@ import { AxiosService } from "~/lib/axios";
 import { AppContainer } from "~/lib/container";
 import type { Coin } from "~/types/types";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
+import { OverviewMapper } from "./overview.mapper";
 
 const ApiService = AppContainer.resolve(AxiosService);
 
@@ -16,6 +17,6 @@ export const overviewRouter = createTRPCRouter({
     const { data } = await ApiService.get<Coin[]>(
       `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`,
     );
-    return data;
+    return OverviewMapper.mapCoinsToAddOrder(data);
   }),
 });

@@ -16,7 +16,7 @@ export default class BinanceService {
               if (cb) this.subscribe(cb)
               this._websocket.ws.onmessage = (event: MessageEvent) => {
                      const ticker = BinanceSocketServiceMapper.mapParseEvent(event);
-                     BinanceSocketServiceMapper.mapPriceToObject(ticker)
+                     BinanceSocketServiceMapper.mapPriceToObject(ticker, BinanceSocketServiceMapper.mapCoinsToFindOrder(coins, ticker))
                      const coinsDataTable = BinanceSocketServiceMapper.mapCoinsToArray();
 
                      // Notify subscribers

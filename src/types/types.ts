@@ -2,6 +2,8 @@ import type { Themes } from "~/constants/constants";
 
 export type AppTheme = keyof typeof Themes;
 export type Coin = {
+  // custom value
+  order: number,
   price: string;
   ath: number;
   ath_change_percentage: number;

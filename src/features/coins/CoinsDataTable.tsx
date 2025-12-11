@@ -16,7 +16,7 @@ export default function CoinsDataTable() {
     if (data) {
       BinanceWebSocketInstance.connectToTicker(setData, data);
     }
-  }, [data]);
+  }, [isLoading]);
   return (
     <Table
       loading={isLoading}
