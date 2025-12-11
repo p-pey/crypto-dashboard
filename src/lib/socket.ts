@@ -1,4 +1,4 @@
-import { injectable, singleton } from "tsyringe";
+import { injectable } from "tsyringe";
 
 // binanceService.ts
 export interface BinanceTicker {
@@ -32,7 +32,6 @@ export const WebSocketSerivceToken = Symbol('WebSocketService')
 @injectable({
        token: WebSocketSerivceToken
 })
-@singleton()
 export default class WebSocketService {
        private _ws: WebSocket | null = null;
        private listeners: Listener[] = [];

@@ -25,5 +25,12 @@ export interface BinanceTicker {
        L: number;   // Last trade ID
        n: number;   // Number of trades
 }
-
-export type Listener = (tickers: BinanceTicker[]) => void;
+export type PriceChange = {
+       key: string,
+       order: number,
+       symbol: string,
+       price: string,
+       change: string,
+       changeUsd: string
+}
+export type Listener = (tickers: PriceChange[]) => void;

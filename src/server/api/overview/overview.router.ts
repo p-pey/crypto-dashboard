@@ -1,10 +1,9 @@
-import { container } from "tsyringe";
 import { AxiosService } from "~/lib/axios";
+import { AppContainer } from "~/lib/container";
 import type { Coin } from "~/types/types";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { OverviewMapper } from "./overview.mapper";
 
-const ApiService = container.resolve(AxiosService);
+const ApiService = AppContainer.resolve(AxiosService);
 
 export const overviewRouter = createTRPCRouter({
   getFearAndGreedIndex: protectedProcedure.query(async ({ ctx }) => {
@@ -15,8 +14,8 @@ export const overviewRouter = createTRPCRouter({
   }),
   getPrices: publicProcedure.query(async () => {
     const { data } = await ApiService.get<Coin[]>(
-      `https://api.binance.com/api/v3/ticker/price`,
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`,
     );
-    return OverviewMapper.mapCoinsTo24Changes(OverviewMapper.mapCoinToGetUSDTPairs(data));
+    return data;
   }),
 });

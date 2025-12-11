@@ -3,9 +3,9 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from "axios";
-import { AppSignleton } from "./container";
+import { AppInjecable } from "./container";
 
-@AppSignleton()
+@AppInjecable()
 class AxiosService {
   private client: AxiosInstance;
 
@@ -58,3 +58,4 @@ class AxiosService {
 }
 
 export { AxiosService };
+
