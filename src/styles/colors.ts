@@ -4,18 +4,21 @@ export const COLORS: Record<keyof typeof Themes, {
        primary: string;
        secondary: string;
        trittary: string;
-       fourthly: string
+       fourthly: string;
+       error: string
 }> = {
        light: {
               primary: "#B6AE9F",
               secondary: "#C5C7BC",
               trittary: "#000000",
-              fourthly: "#FBF3D1"
+              fourthly: "#FBF3D1",
+              error: "#1c0003"
        },
        dark: {
               primary: "#002455",
               secondary: "#050E3C",
               trittary: "#DC0000",
               fourthly: "#FF3838",
+              error: "#1c0003"
        },
 }

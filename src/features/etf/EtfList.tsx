@@ -13,12 +13,8 @@ export default function EtfList({ data }: { data: any }) {
 
   const isBullish = meta.chartPreviousClose <= meta.regularMarketDayHigh;
 
-  console.log("meta:", meta);
-
   return (
-    <Card
-        className="border border-black !bg-transparent !rounded-2xl p-4 h-[350px] shadow-lg"
-    >
+    <Card className="h-[350px] !rounded-2xl border border-black !bg-transparent p-4 shadow-lg">
       <Row justify="center" align="middle" className="gap-4">
         <Col>
           <Row align="middle" justify="space-between" gutter={12} wrap={false}>
@@ -28,7 +24,11 @@ export default function EtfList({ data }: { data: any }) {
               src={`https://logo.clearbit.com/nyse.com`}
             />
             <Col>
-              <Title className="!text-black !font-bold" level={4} style={{ margin: 0 }}>
+              <Title
+                className="!font-bold !text-black"
+                level={4}
+                style={{ margin: 0 }}
+              >
                 {meta.symbol}
               </Title>
               <Text type="secondary">{meta.longName}</Text>
@@ -36,11 +36,13 @@ export default function EtfList({ data }: { data: any }) {
           </Row>
         </Col>
 
-        <Col className="text-center mx-auto">
-            <Row justify="center" className="!m-0 !p-0">
-            <Title level={2} className="!font-bold !text-black !m-0">${meta.regularMarketPrice.toFixed(2)}</Title>
-            <Typography className="!text-black font-bold">m</Typography>
-            </Row>
+        <Col className="mx-auto text-center">
+          <Row justify="center" className="!m-0 !p-0">
+            <Title level={2} className="!m-0 !font-bold !text-black">
+              ${meta.regularMarketPrice.toFixed(2)}
+            </Title>
+            <Typography className="font-bold !text-black">m</Typography>
+          </Row>
         </Col>
       </Row>
 
@@ -60,19 +62,27 @@ export default function EtfList({ data }: { data: any }) {
 
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={8}>
-          <Text className="!text-black" strong>Day High:</Text>
+          <Text className="!text-black" strong>
+            Day High:
+          </Text>
           <br />
           <Text className="!text-black">${meta.regularMarketDayHigh}</Text>
         </Col>
         <Col span={8}>
-          <Text className="!text-black" strong>Day Low:</Text>
+          <Text className="!text-black" strong>
+            Day Low:
+          </Text>
           <br />
           <Text className="!text-black">${meta.regularMarketDayLow}</Text>
         </Col>
         <Col span={8}>
-          <Text className="!text-black" strong>Volume:</Text>
+          <Text className="!text-black" strong>
+            Volume:
+          </Text>
           <br />
-          <Text className="!text-black">{meta.regularMarketVolume.toLocaleString()}</Text>
+          <Text className="!text-black">
+            {meta.regularMarketVolume.toLocaleString()}
+          </Text>
         </Col>
       </Row>
     </Card>

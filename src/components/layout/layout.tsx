@@ -1,10 +1,10 @@
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
-import type { PropsWithChildren } from "react";
-import { AntdRegistry } from "@ant-design/nextjs-registry";
-import Sidebar from "./sidebar";
-import AppFooter from "./footer";
 import Sider from "antd/es/layout/Sider";
+import type { PropsWithChildren } from "react";
+import AppFooter from "./footer";
+import Sidebar from "./sidebar";
 export default function RootLayout(props: PropsWithChildren) {
   return (
     <html lang="en">
@@ -17,8 +17,8 @@ export default function RootLayout(props: PropsWithChildren) {
             <Layout>
               <Header />
               <Content
-                  className="!overflow-y-auto"
-                style={{ margin: "16px", padding: "16px", background: "#fff" }}
+                className="!overflow-y-auto"
+                style={{ background: "#fff" }}
               >
                 {props.children}
               </Content>

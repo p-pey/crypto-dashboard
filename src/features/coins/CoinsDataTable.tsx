@@ -22,6 +22,11 @@ export default function CoinsDataTable() {
       loading={isLoading}
       dataSource={LData}
       columns={columns}
+      expandable={{
+        expandedRowRender: (record) => {
+          return <span>{record.symbol}</span>;
+        },
+      }}
       pagination={false}
     />
   );

@@ -6,8 +6,8 @@ import { Geist } from "next/font/google";
 
 import { cookies } from "next/headers";
 import "reflect-metadata";
+import RootLayout from "~/components/layout/layout";
 import { DEFAULT_APP_THEME } from "~/constants/constants";
-import RootLayout from "~/features/root/layout";
 import ThemeProvider from "~/providers/Theme.Provider";
 import { TRPCReactProvider } from "~/trpc/react";
 import type { AppTheme } from "~/types/types";

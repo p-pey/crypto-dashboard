@@ -12,7 +12,8 @@ export default class BinanceService {
        constructor(@AppInject(WebSocketSerivceToken) private _websocket: WebSocketService) { }
 
        connectToTicker(cb: Listener, coins: Coin[]): void {
-              this._websocket.connect(`wss://stream.binance.com:9443/stream?streams=${BinanceSocketServiceMapper.mapCoinsSymbolToGetUrlParam(coins)}`);
+              const url = `wss://stream.binance.com:9443/stream?streams=${BinanceSocketServiceMapper.mapCoinsSymbolToGetUrlParam(coins)}`
+              this._websocket.connect(url);
               if (cb) this.subscribe(cb)
               this._websocket.ws.onmessage = (event: MessageEvent) => {
                      const ticker = BinanceSocketServiceMapper.mapParseEvent(event);
@@ -25,7 +26,7 @@ export default class BinanceService {
 
               this._websocket.ws.onclose = () => {
                      console.log("Binance WebSocket closed. Reconnecting...");
-                     setTimeout(() => this._websocket.connect("wss://stream.binance.com:9443/ws/!ticker@arr"), 5000);
+                     setTimeout(() => this._websocket.connect(url), 5000);
               };
        }
 
