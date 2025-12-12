@@ -1,0 +1,12 @@
+.ContentWrapper {
+  border-radius: 25px;
+  overflow: auto;
+}
+
+.Header {
+  border-radius: 25px;
+}
+
+.sider {
+  border-radius: 25px;
+}

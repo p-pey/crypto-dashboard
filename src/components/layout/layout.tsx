@@ -5,22 +5,27 @@ import Sider from "antd/es/layout/Sider";
 import type { PropsWithChildren } from "react";
 import AppFooter from "./footer";
 import Sidebar from "./sidebar";
+import AppStyle from "./styles/app.module.css";
 export default function RootLayout(props: PropsWithChildren) {
   return (
     <html lang="en">
       <body>
         <AntdRegistry>
           <Layout style={{ minHeight: "100vh" }}>
-            <Sider breakpoint="lg" collapsedWidth="0">
+            <Sider
+              breakpoint="lg"
+              collapsedWidth="0"
+              className={AppStyle.sider}
+            >
               <Sidebar />
             </Sider>
             <Layout>
-              <Header />
+              <Header className={AppStyle.Header} />
               <Content
                 className="!overflow-y-auto"
-                style={{ background: "#fff" }}
+                style={{ background: "#fff", padding: "8px" }}
               >
-                {props.children}
+                <div className={AppStyle.ContentWrapper}>{props.children}</div>
               </Content>
               <AppFooter />
             </Layout>
