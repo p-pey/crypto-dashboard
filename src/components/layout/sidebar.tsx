@@ -39,11 +39,11 @@ export default function AppSidebar() {
   const activeTab = items.find((item) => item?.key === currentTab);
 
   return (
-    <div style={{ height: "100%", background: "#001529" }}>
+    <div style={{ maxHeight: "100%", minHeight: "100%" , background: "#001529", borderRadius: 25 }}>
       <div
         style={{ color: "white", padding: 16, fontWeight: 600, fontSize: 18 }}
       >
-        Crypto Dashboard
+        Dashboard
       </div>
       <Menu
         theme="dark"

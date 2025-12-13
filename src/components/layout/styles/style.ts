@@ -1,8 +1,7 @@
-import styled from "styled-components";
 
 export const headerStyle: React.CSSProperties = {
   textAlign: "center",
-  color: "#fff",
+  color: "transparent",
   height: 64,
   paddingInline: 48,
   lineHeight: "64px",
@@ -27,7 +26,3 @@ export const layoutStyle = {
   width: "100%",
   height: "100%",
 };
-
-export const StyledContentWrapper = styled.div`
-  border-radius: 24px;
-`;

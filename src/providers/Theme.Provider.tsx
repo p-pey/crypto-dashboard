@@ -19,6 +19,7 @@ export default function ThemeProvider(
           colorBgContainer: colors.secondary,
           colorText: colors.trittary,
           colorBorder: colors.fourthly,
+          padding: 8,
         },
       }}
     >

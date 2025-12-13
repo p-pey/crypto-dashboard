@@ -36,7 +36,6 @@
     "recharts": "^3.3.0",
     "reflect-metadata": "^0.2.2",
     "server-only": "^0.0.1",
-    "styled-components": "^6.1.19",
     "superjson": "^2.2.1",
     "swr": "^2.3.6",
     "tsyringe": "^4.10.0",
@@ -58,9 +57,6 @@
   },
   "ct3aMetadata": {
     "initVersion": "7.39.3"
-  },
-  "resolutions": {
-    "styled-components": "^5"
   },
   "packageManager": "npm@11.3.0"
 }

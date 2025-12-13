@@ -11,7 +11,7 @@ export default function RootLayout(props: PropsWithChildren) {
     <html lang="en">
       <body>
         <AntdRegistry>
-          <Layout style={{ minHeight: "100vh" }}>
+          <Layout style={{ height: "100vh", padding: "4px", background: "#B6AE9F", gap: "4px" }}>
             <Sider
               breakpoint="lg"
               collapsedWidth="0"
@@ -23,7 +23,7 @@ export default function RootLayout(props: PropsWithChildren) {
               <Header className={AppStyle.Header} />
               <Content
                 className="!overflow-y-auto"
-                style={{ background: "#fff", padding: "8px" }}
+                style={{ background: "#B6AE9F", padding: "8px",  }}
               >
                 <div className={AppStyle.ContentWrapper}>{props.children}</div>
               </Content>
