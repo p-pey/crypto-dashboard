@@ -7,7 +7,7 @@ import { AppInjecable } from "./container";
 
 @AppInjecable()
 class AxiosService {
-  private client: AxiosInstance;
+  private readonly client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({

@@ -26,11 +26,13 @@ export interface BinanceTicker {
        n: number;   // Number of trades
 }
 export type PriceChange = {
-       key: string,
-       order: number,
-       symbol: string,
-       price: string,
-       change: string,
-       changeUsd: string
-}
+  key: string;
+  order: number;
+  symbol: string;
+  price: string;
+  change: string;
+  changeUsd: string;
+  divideToBTC: string;
+  image: string
+};
 export type Listener = (tickers: PriceChange[]) => void;
