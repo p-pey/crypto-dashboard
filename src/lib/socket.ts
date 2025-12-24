@@ -28,9 +28,9 @@ export interface BinanceTicker {
 }
 
 type Listener = (tickers: BinanceTicker[]) => void;
-export const WebSocketSerivceToken = Symbol('WebSocketService')
+export const WebSocketServiceToken = Symbol('WebSocketService')
 @injectable({
-       token: WebSocketSerivceToken
+       token: WebSocketServiceToken
 })
 export default class WebSocketService {
        private _ws: WebSocket | null = null;
