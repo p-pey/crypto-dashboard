@@ -10,11 +10,14 @@ import { columns } from "./CoinDataTable.utils";
 
 const BinanceWebSocketInstance = AppContainer.resolve(BinanceService);
 export default function CoinsDataTable() {
-  const [LData, setData] = useState<PriceChange[]>([]);
-  const { isLoading, data } = api.overview.getPrices.useQuery(undefined, { refetchOnWindowFocus: false, refetchOnMount: true });
+  const [LData, setLData] = useState<PriceChange[]>([]);
+  const { isLoading, data } = api.overview.getPrices.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+  });
   useEffect(() => {
     if (data?.length) {
-      BinanceWebSocketInstance.connectToTicker(data, setData);
+      BinanceWebSocketInstance.connectToTicker(data, setLData);
     }
   }, [isLoading]);
   return (
@@ -24,7 +27,7 @@ export default function CoinsDataTable() {
       columns={columns}
       expandable={{
         expandedRowRender: (record) => {
-          if(record.symbol === "BTC") return null;
+          if (record.symbol === "BTC") return null;
           return (
             <span>{`${record.symbol} / BTC = ${record.divideToBTC}`}</span>
           );
