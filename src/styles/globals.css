@@ -111,7 +111,11 @@
   --color-up-soft: var(--up-soft);
   --color-down-soft: var(--down-soft);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Geist covers Latin and numerals, Vazirmatn picks up the Arabic script used
+     by the Persian locale. The browser falls back per character, so the two
+     faces can sit side by side. */
+  --font-sans: var(--font-geist-sans), var(--font-vazirmatn), ui-sans-serif,
+    system-ui, sans-serif;
   --font-mono:
     ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
 

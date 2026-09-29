@@ -2,9 +2,10 @@
 
 import { Alert } from "antd";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
-import IrPriceTable from "~/features/iran/IrPriceTable";
+import { useEffect, useMemo, useRef, useState } from "react";
+import IrMarketTable, { type QuoteUnit } from "~/features/iran/IrMarketTable";
 import { AppContainer } from "~/lib/container";
+import { useI18n } from "~/i18n/I18nProvider";
 import IrPriceSocketService from "~/services/iran/IrPriceSocketService";
 import type { IrTicker } from "~/services/iran/iran.types";
 import { api } from "~/trpc/react";
@@ -12,8 +13,10 @@ import { api } from "~/trpc/react";
 const IrSocket = AppContainer.resolve(IrPriceSocketService);
 
 export default function IrPricePage() {
+  const { t } = useI18n();
   const [tickers, setTickers] = useState<IrTicker[]>([]);
   const [live, setLive] = useState(false);
+  const [unit, setUnit] = useState<QuoteUnit>("rial");
   const startedRef = useRef(false);
 
   const { data, isLoading, isError, error } = api.iran.getTickers.useQuery(
@@ -25,6 +28,28 @@ export default function IrPricePage() {
       refetchInterval: 20_000,
     },
   );
+
+  /** Wallex's whole Toman market list, one request per poll. */
+  const {
+    data: boards,
+    isError: boardsError,
+    error: boardsErr,
+  } = api.iran.getBoards.useQuery(undefined, {
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    staleTime: 20_000,
+  });
+
+  /** nerkh.io's rate feed, merged in beside the exchange prices. */
+  const {
+    data: nerkh,
+    isError: nerkhError,
+    error: nerkhErr,
+  } = api.nerkh.getSnapshot.useQuery(undefined, {
+    refetchInterval: 25_000,
+    refetchOnWindowFocus: true,
+    staleTime: 15_000,
+  });
 
   useEffect(() => {
     const unsubscribe = IrSocket.subscribe((next) => {
@@ -64,6 +89,48 @@ export default function IrPricePage() {
     };
   }, []);
 
+  const alerts = useMemo(() => {
+    const list: { key: string; message: string; description: string }[] = [];
+
+    if (isError) {
+      list.push({
+        key: "exchanges",
+        message: t("irPrice.errorTitle"),
+        description:
+          error instanceof Error ? error.message : t("irPrice.errorFallback"),
+      });
+    }
+    if (boardsError) {
+      list.push({
+        key: "boards",
+        message: t("irPrice.boardErrorTitle"),
+        description:
+          boardsErr instanceof Error
+            ? boardsErr.message
+            : t("irPrice.boardError"),
+      });
+    }
+    if (nerkhError) {
+      list.push({
+        key: "nerkh",
+        message: t("irPrice.nerkhErrorTitle"),
+        description:
+          nerkhErr instanceof Error
+            ? nerkhErr.message
+            : t("irPrice.nerkhError"),
+      });
+    }
+    if (nerkh?.stale) {
+      list.push({
+        key: "nerkh-stale",
+        message: t("nerkh.staleWarning"),
+        description: nerkh.error ?? "",
+      });
+    }
+
+    return list;
+  }, [boardsError, boardsErr, error, isError, nerkh, nerkhError, nerkhErr, t]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -72,14 +139,12 @@ export default function IrPricePage() {
       className="panel px-5 py-5"
     >
       <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="max-w-3xl">
           <h2 className="text-fg text-[16px] font-bold tracking-tight">
-            Iranian exchange prices
+            {t("irPrice.title")}
           </h2>
-          <p className="text-fg-3 mt-1 max-w-2xl text-[12.5px] leading-relaxed">
-            USDT and gold (XAUT + digital gold) quoted in IRT across Nobitex,
-            Wallex, Bitpin and Tabdeal. Prices are seeded from REST and kept
-            fresh over each exchange&apos;s own websocket.
+          <p className="text-fg-3 mt-1 text-[12.5px] leading-relaxed">
+            {t("irPrice.description")}
           </p>
         </div>
 
@@ -94,26 +159,31 @@ export default function IrPricePage() {
             />
           </span>
           <span className="text-fg-2 text-[11px] font-semibold">
-            {live ? "websocket live" : "rest refresh only"}
+            {live ? t("irPrice.websocketLive") : t("irPrice.restOnly")}
           </span>
         </span>
       </header>
 
       <div className="flex flex-col gap-4">
-        {isError && (
+        {alerts.map((alert) => (
           <Alert
+            key={alert.key}
             type="warning"
             showIcon
-            message="Could not load the REST snapshot"
-            description={
-              error instanceof Error
-                ? error.message
-                : "All exchanges rejected the request. They are Iran-IP only, so the request must originate from an Iranian network."
-            }
+            message={alert.message}
+            description={alert.description || undefined}
           />
-        )}
+        ))}
 
-        <IrPriceTable tickers={tickers} loading={isLoading} connected={live} />
+        <IrMarketTable
+          tickers={tickers}
+          boards={boards?.boards ?? []}
+          nerkh={nerkh}
+          loading={isLoading}
+          unit={unit}
+          onUnit={setUnit}
+          live={live}
+        />
       </div>
     </motion.div>
   );

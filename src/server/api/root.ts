@@ -3,6 +3,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { overviewRouter } from "./overview/overview.router";
 import { EtfRouter } from "./etf/etf.router";
 import { iranRouter } from "./iran/iran.router";
+import { nerkhRouter } from "./nerkh/nerkh.router";
+import { macroRouter } from "./macro/macro.router";
 import { statusesRouter } from "./statuses/statuses.service";
 
 /**
@@ -15,6 +17,8 @@ export const appRouter = createTRPCRouter({
   overview: overviewRouter,
   etf: EtfRouter,
   iran: iranRouter,
+  nerkh: nerkhRouter,
+  macro: macroRouter,
   statuses: statusesRouter,
 });
 

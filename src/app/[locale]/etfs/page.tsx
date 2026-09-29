@@ -4,11 +4,13 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import EtfCoins, { type EtfAsset } from "~/features/etf/EtfCoins";
 import EtfList from "~/features/etf/EtfList";
+import { useI18n } from "~/i18n/I18nProvider";
 import { api } from "~/trpc/react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function Etfs() {
+  const { t } = useI18n();
   const [asset, setAsset] = useState<EtfAsset>("BTC");
   const {
     data: etfs = [],
@@ -41,7 +43,7 @@ export default function Etfs() {
 
       {isError && (
         <div className="panel text-down px-5 py-8 text-center text-[13px]">
-          Could not reach the market data provider. Try again shortly.
+          {t("etfs.error")}
         </div>
       )}
 

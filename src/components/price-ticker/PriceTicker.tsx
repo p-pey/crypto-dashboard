@@ -2,23 +2,28 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
+import { navHref } from "~/constants/navigation";
+import { formatSignedPercent } from "~/i18n/format";
+import { useI18n } from "~/i18n/I18nProvider";
 import { api } from "~/trpc/react";
 import type { Coin } from "~/types/types";
 
 export default function PriceTicker() {
+  const { locale, t } = useI18n();
   const { data } = api.overview.getPrices.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: 60_000,
   });
 
   const items: Coin[] = data ?? [];
+  const home = navHref(locale, "/");
 
   return (
     <div className="glass relative flex h-[42px] items-center overflow-hidden rounded-[16px]">
-      <div className="border-line/70 from-brand/20 z-10 flex h-full shrink-0 items-center gap-2 border-r bg-gradient-to-r to-transparent px-3.5">
+      <div className="border-line/70 from-brand/20 z-10 flex h-full shrink-0 items-center gap-2 border-e bg-gradient-to-r to-transparent px-3.5">
         <span className="bg-brand-2 size-1.5 rounded-full shadow-[0_0_10px_var(--brand-2)]" />
         <span className="text-fg-2 text-[10px] font-bold tracking-[0.14em] uppercase">
-          24h
+          {t("footer.change24h")}
         </span>
       </div>
 
@@ -45,7 +50,7 @@ export default function PriceTicker() {
                   return (
                     <Link
                       key={`${dup}-${coin.symbol}`}
-                      href="/"
+                      href={home}
                       className="num hover:bg-surface-2 flex items-center gap-1.5 px-3.5 py-1 text-[12px] whitespace-nowrap transition-colors"
                     >
                       <span className="text-fg-2 font-semibold">
@@ -55,8 +60,10 @@ export default function PriceTicker() {
                         className="font-bold tabular-nums"
                         style={{ color: up ? "var(--up)" : "var(--down)" }}
                       >
-                        {up ? "+" : ""}
-                        {coin.price_change_percentage_24h.toFixed(2)}%
+                        {formatSignedPercent(
+                          locale,
+                          coin.price_change_percentage_24h,
+                        )}
                       </span>
                       <svg
                         viewBox="0 0 24 24"
@@ -77,18 +84,18 @@ export default function PriceTicker() {
           </div>
         )}
 
-        <div className="from-surface pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r to-transparent" />
-        <div className="from-surface pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l to-transparent" />
+        <div className="from-surface pointer-events-none absolute inset-y-0 start-0 w-10 bg-gradient-to-r to-transparent" />
+        <div className="from-surface pointer-events-none absolute inset-y-0 end-0 w-10 bg-gradient-to-l to-transparent" />
       </div>
 
       <motion.div
-        className="border-line/70 z-10 hidden h-full shrink-0 items-center border-l px-3.5 md:flex"
+        className="border-line/70 z-10 hidden h-full shrink-0 items-center border-s px-3.5 md:flex"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
         <span className="text-fg-3 text-[10px] font-medium tracking-wider uppercase">
-          Obsidian Terminal
+          {t("footer.terminal")}
         </span>
       </motion.div>
     </div>

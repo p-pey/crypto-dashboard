@@ -13,50 +13,25 @@ import {
   Typography,
 } from "antd";
 import { useMemo } from "react";
+import { VERDICT_COLOR } from "~/features/coins/CoinDataTable.utils";
+import { formatDateTime, formatNumber, formatPercent } from "~/i18n/format";
+import { useI18n } from "~/i18n/I18nProvider";
+import type { Locale } from "~/i18n/config";
 import { api } from "~/trpc/react";
-import type {
-  StatusSignal,
-  StatusVerdict,
-} from "~/services/statuses/statuses.types";
-
-const VERDICT_META: Record<
-  StatusVerdict,
-  { label: string; color: string; advice: string }
-> = {
-  strong_buy: {
-    label: "Strong Buy",
-    color: "#00b894",
-    advice:
-      "Signals line up favourably. Still size the position as if it could be wrong.",
-  },
-  buy: { label: "Buy", color: "#7bed9f", advice: "Mildly favourable setup." },
-  neutral: {
-    label: "Hold",
-    color: "#dfe6e9",
-    advice: "Nothing decisive either way. Waiting costs nothing here.",
-  },
-  reduce: {
-    label: "Reduce",
-    color: "#fdcb6e",
-    advice: "Some signals have turned. Trimming risk is reasonable.",
-  },
-  avoid: {
-    label: "Avoid",
-    color: "#ff7675",
-    advice: "Signals are unfavourable. Standing aside is the position.",
-  },
-};
+import type { StatusSignal } from "~/services/statuses/statuses.types";
 
 function signalColor(signal: StatusSignal): string {
-  if (!signal.available) return "#dfe6e9";
+  if (!signal.available) return "#95a5a6";
   if (signal.score >= 40) return "#00b894";
   if (signal.score >= 15) return "#7bed9f";
   if (signal.score <= -40) return "#d63031";
   if (signal.score <= -15) return "#ff7675";
-  return "#dfe6e9";
+  return "#95a5a6";
 }
 
 function SignalBar({ signal }: { signal: StatusSignal }) {
+  const { t } = useI18n();
+
   if (!signal.available) {
     return (
       <Tooltip title={signal.detail}>
@@ -64,14 +39,18 @@ function SignalBar({ signal }: { signal: StatusSignal }) {
           style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
         >
           <span style={{ opacity: 0.5 }}>{signal.label}</span>
-          <span style={{ opacity: 0.4, fontSize: 12 }}>unavailable</span>
+          <span style={{ opacity: 0.4, fontSize: 12 }}>
+            {t("markets.panel.unavailableLabel")}
+          </span>
         </div>
       </Tooltip>
     );
   }
 
   return (
-    <Tooltip title={`${signal.detail} (weight ${signal.weight})`}>
+    <Tooltip
+      title={`${signal.detail} (${t("markets.panel.weightSuffix", signal.weight)})`}
+    >
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
         <span>{signal.label}</span>
         <span
@@ -105,6 +84,8 @@ export default function CoinStatusPanel({
   name,
   onForceRefresh,
 }: CoinStatusPanelProps) {
+  const { t } = useI18n();
+
   return coinId ? (
     <PanelBody
       coinId={coinId}
@@ -116,8 +97,8 @@ export default function CoinStatusPanel({
     <Alert
       type="warning"
       showIcon
-      message="No CoinGecko id for this row"
-      description="Status analysis needs the CoinGecko id and cannot run for this coin."
+      message={t("markets.panel.noCoinIdTitle")}
+      description={t("markets.panel.noCoinIdBody")}
     />
   );
 }
@@ -133,6 +114,7 @@ function PanelBody({
   name: string | undefined;
   onForceRefresh?: () => void;
 }) {
+  const { locale, t } = useI18n();
   const input = { coinId, symbol, name: name ?? undefined };
 
   const { data, isLoading, isFetching, error } =
@@ -154,7 +136,6 @@ function PanelBody({
   });
 
   const status = data?.status ?? null;
-  const meta = status ? VERDICT_META[status.verdict] : null;
 
   const sortedSignals = useMemo(() => {
     if (!status) return [];
@@ -164,14 +145,22 @@ function PanelBody({
     );
   }, [status]);
 
+  const cardStyle: React.CSSProperties = {
+    border: "1px solid var(--border)",
+    borderRadius: 10,
+    padding: 12,
+  };
+
   if (error) {
     return (
       <Alert
         type="error"
         showIcon
-        message="Analysis failed"
+        message={t("markets.panel.failedTitle")}
         description={
-          error instanceof Error ? error.message : "unexpected error"
+          error instanceof Error
+            ? error.message
+            : t("markets.panel.unexpectedError")
         }
       />
     );
@@ -186,7 +175,7 @@ function PanelBody({
   }
 
   if (!status) {
-    return <Empty description="No status available" />;
+    return <Empty description={t("markets.panel.empty")} />;
   }
 
   return (
@@ -201,22 +190,30 @@ function PanelBody({
         }}
       >
         <Space size="small" align="center" wrap>
-          <Tag color={meta?.color} style={{ fontWeight: 700, fontSize: 13 }}>
-            {meta?.label}
+          <Tag
+            color={VERDICT_COLOR[status.verdict]}
+            style={{ fontWeight: 700, fontSize: 13 }}
+          >
+            {t(`markets.verdict.${status.verdict}`)}
           </Tag>
           <Typography.Text type="secondary">
-            composite score {status.score} / 100
+            {t("markets.panel.composite", status.score)}
           </Typography.Text>
-          <Tooltip title={meta?.advice}>
-            <Typography.Text type="secondary" style={{ cursor: "help" }}>
-              {meta?.advice}
+          <Tooltip title={t(`markets.verdictAdvice.${status.verdict}`)}>
+            <Typography.Text
+              type="secondary"
+              style={{ cursor: "help", maxWidth: 460 }}
+            >
+              {t(`markets.verdictAdvice.${status.verdict}`)}
             </Typography.Text>
           </Tooltip>
         </Space>
 
         <Space size="small">
           {isFetching && (
-            <Typography.Text type="secondary">updating…</Typography.Text>
+            <Typography.Text type="secondary">
+              {t("markets.panel.updating")}
+            </Typography.Text>
           )}
           <Button
             size="small"
@@ -228,7 +225,7 @@ function PanelBody({
               })
             }
           >
-            Re-analyse
+            {t("markets.panel.reanalyse")}
           </Button>
         </Space>
       </div>
@@ -245,7 +242,7 @@ function PanelBody({
             ? "#00b894"
             : status.score <= -15
               ? "#d63031"
-              : "#b2bec3"
+              : "#95a5a6"
         }
       />
 
@@ -258,28 +255,22 @@ function PanelBody({
       >
         <div
           style={{
-            border: "1px solid #dfe6e9",
-            borderRadius: 8,
-            padding: 12,
+            ...cardStyle,
             display: "flex",
             flexDirection: "column",
             gap: 6,
           }}
         >
-          <Typography.Text strong>Signals</Typography.Text>
+          <Typography.Text strong>{t("markets.panel.signals")}</Typography.Text>
           {sortedSignals.map((signal) => (
             <SignalBar key={signal.key} signal={signal} />
           ))}
         </div>
 
-        <div
-          style={{
-            border: "1px solid #dfe6e9",
-            borderRadius: 8,
-            padding: 12,
-          }}
-        >
-          <Typography.Text strong>Technicals</Typography.Text>
+        <div style={cardStyle}>
+          <Typography.Text strong>
+            {t("markets.panel.technicals")}
+          </Typography.Text>
           <Descriptions
             size="small"
             column={1}
@@ -287,51 +278,45 @@ function PanelBody({
             items={[
               {
                 key: "rsi",
-                label: "RSI14",
-                children: fmt(status.technicals?.rsi14),
+                label: t("markets.panel.labels.rsi"),
+                children: fmt(locale, status.technicals?.rsi14),
               },
               {
                 key: "sma20",
-                label: "SMA20",
-                children: fmt(status.technicals?.sma20),
+                label: t("markets.panel.labels.sma20"),
+                children: fmt(locale, status.technicals?.sma20),
               },
               {
                 key: "sma50",
-                label: "SMA50",
-                children: fmt(status.technicals?.sma50),
+                label: t("markets.panel.labels.sma50"),
+                children: fmt(locale, status.technicals?.sma50),
               },
               {
                 key: "sma200",
-                label: "SMA200",
-                children: fmt(status.technicals?.sma200),
+                label: t("markets.panel.labels.sma200"),
+                children: fmt(locale, status.technicals?.sma200),
               },
               {
                 key: "macd",
-                label: "MACD hist",
-                children: fmt(status.technicals?.macdHistogram, 6),
+                label: t("markets.panel.labels.macd"),
+                children: fmt(locale, status.technicals?.macdHistogram, 6),
               },
               {
                 key: "atr",
-                label: "ATR",
-                children: pct(status.technicals?.atrPct),
+                label: t("markets.panel.labels.atr"),
+                children: pct(locale, status.technicals?.atrPct),
               },
               {
                 key: "d7",
-                label: "7d change",
-                children: pct(status.technicals?.change7d),
+                label: t("markets.panel.labels.change7d"),
+                children: pct(locale, status.technicals?.change7d),
               },
             ]}
           />
         </div>
 
-        <div
-          style={{
-            border: "1px solid #dfe6e9",
-            borderRadius: 8,
-            padding: 12,
-          }}
-        >
-          <Typography.Text strong>Market &amp; community</Typography.Text>
+        <div style={cardStyle}>
+          <Typography.Text strong>{t("markets.panel.market")}</Typography.Text>
           <Descriptions
             size="small"
             column={1}
@@ -339,27 +324,27 @@ function PanelBody({
             items={[
               {
                 key: "rank",
-                label: "MCap rank",
-                children: fmt(status.market?.marketCapRank),
+                label: t("markets.panel.labels.marketCapRank"),
+                children: fmt(locale, status.market?.marketCapRank, 0),
               },
               {
                 key: "votes",
-                label: "Bullish votes",
-                children: pct(status.market?.votesUpPercent),
+                label: t("markets.panel.labels.votesUp"),
+                children: pct(locale, status.market?.votesUpPercent),
               },
               {
                 key: "watch",
-                label: "Watchlist users",
-                children: fmt(status.market?.watchlistUsers),
+                label: t("markets.panel.labels.watchlist"),
+                children: fmt(locale, status.market?.watchlistUsers, 0),
               },
               {
                 key: "ath",
-                label: "From ATH",
-                children: pct(status.market?.athChangePercent),
+                label: t("markets.panel.labels.fromAth"),
+                children: pct(locale, status.market?.athChangePercent),
               },
               {
                 key: "fng",
-                label: "Fear & greed",
+                label: t("markets.panel.labels.fearGreed"),
                 children:
                   status.market?.fearAndGreed === null ||
                   status.market?.fearAndGreed === undefined
@@ -373,8 +358,10 @@ function PanelBody({
 
       {status.news.length > 0 && (
         <div>
-          <Typography.Text strong>Recent headlines</Typography.Text>
-          <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
+          <Typography.Text strong>
+            {t("markets.panel.headlines")}
+          </Typography.Text>
+          <ul style={{ margin: "8px 0 0", paddingInlineStart: 18 }}>
             {status.news.slice(0, 5).map((item) => (
               <li key={item.link} style={{ marginBottom: 4 }}>
                 <a href={item.link} target="_blank" rel="noreferrer">
@@ -400,19 +387,26 @@ function PanelBody({
 
       <Space size="small" wrap>
         <Tag>
-          written by{" "}
-          {status.generatedBy === "llm"
-            ? `${status.llmProvider} / ${status.llmModel}`
-            : "deterministic scorer"}
+          {t(
+            "markets.panel.writtenBy",
+            status.generatedBy === "llm"
+              ? `${status.llmProvider} / ${status.llmModel}`
+              : t("markets.panel.deterministic"),
+          )}
         </Tag>
-        <Tag>cached until {new Date(status.expiresAt).toLocaleString()}</Tag>
+        <Tag>
+          {t(
+            "markets.panel.cachedUntil",
+            formatDateTime(locale, status.expiresAt),
+          )}
+        </Tag>
       </Space>
 
       {status.llmError && (
         <Alert
           type="info"
           showIcon
-          message="LLM unavailable, deterministic narrative used"
+          message={t("markets.panel.llmUnavailableTitle")}
           description={status.llmError}
         />
       )}
@@ -421,9 +415,9 @@ function PanelBody({
         <Alert
           type="warning"
           showIcon
-          message="Some data sources were unreachable"
+          message={t("markets.panel.sourcesDownTitle")}
           description={
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
+            <ul style={{ margin: 0, paddingInlineStart: 18 }}>
               {status.unavailableSources.map((source) => (
                 <li key={source}>{source}</li>
               ))}
@@ -435,14 +429,14 @@ function PanelBody({
   );
 }
 
-function fmt(value: number | null | undefined, digits = 2): string {
-  if (value === null || value === undefined) return "—";
-  return value.toLocaleString(undefined, {
-    maximumFractionDigits: digits,
-  });
+function fmt(
+  locale: Locale,
+  value: number | null | undefined,
+  digits = 2,
+): string {
+  return formatNumber(locale, value, { maximumFractionDigits: digits });
 }
 
-function pct(value: number | null | undefined): string {
-  if (value === null || value === undefined) return "—";
-  return `${value.toFixed(2)}%`;
+function pct(locale: Locale, value: number | null | undefined): string {
+  return formatPercent(locale, value, 2);
 }

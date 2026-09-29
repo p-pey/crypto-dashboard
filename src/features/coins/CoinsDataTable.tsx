@@ -8,13 +8,14 @@ import BinanceService from "~/services/binance/BinanceSocketService";
 import { coinPriceHistory } from "~/services/binance/priceHistory";
 import type { PriceChange } from "~/services/binance/BinanceSocketService.types";
 import { api } from "~/trpc/react";
-import { columns } from "./CoinDataTable.utils";
+import { useCoinColumns } from "./CoinDataTable.utils";
 
 const BinanceWebSocketInstance = AppContainer.resolve(BinanceService);
 
 export default function CoinsDataTable() {
   const [LData, setLData] = useState<PriceChange[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
+  const columns = useCoinColumns();
   const { isLoading, data } = api.overview.getPrices.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchOnMount: true,

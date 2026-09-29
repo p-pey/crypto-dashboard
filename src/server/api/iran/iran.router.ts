@@ -1,7 +1,10 @@
+import { z } from "zod";
+
 import { IR_ASSETS, IR_EXCHANGES } from "~/constants/iranExchanges";
 import { AxiosService } from "~/lib/axios";
 import { AppContainer } from "~/lib/container";
 import { IrPriceMapper } from "~/services/iran/iran.mapper";
+import WallexBoardService from "~/services/iran/WallexBoardService";
 import type {
   IrAssetConfig,
   IrExchangeConfig,
@@ -12,6 +15,7 @@ import type {
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 const ApiService = AppContainer.resolve(AxiosService);
+const WallexBoard = AppContainer.resolve(WallexBoardService);
 
 const BROWSER_HEADERS = {
   Accept: "application/json, text/plain, */*",
@@ -142,4 +146,16 @@ export const iranRouter = createTRPCRouter({
 
     return { tickers, resolved, fetchedAt: Date.now() };
   }),
+
+  /**
+   * The wide price board. Wallex publishes its full Toman market list with the
+   * book snapshot attached, so the whole exchange arrives in one request
+   * instead of one request per market.
+   */
+  getBoards: publicProcedure
+    .input(z.object({ force: z.boolean().optional() }).optional())
+    .query(async ({ input }) => {
+      const board = await WallexBoard.getBoard({ force: input?.force });
+      return { boards: [board] };
+    }),
 });

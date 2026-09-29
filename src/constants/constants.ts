@@ -5,4 +5,5 @@ export const Themes = {
   light: "light",
 } as const;
 
-export const DEFAULT_APP_THEME: AppTheme = Themes.dark;
+/** The app boots into the light "Pearl" palette; `src/proxy.ts` seeds the cookie. */
+export const DEFAULT_APP_THEME: AppTheme = Themes.light;

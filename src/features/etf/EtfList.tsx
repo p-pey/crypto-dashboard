@@ -3,11 +3,11 @@
 import { motion } from "motion/react";
 import { useMemo } from "react";
 import { Sparklines, SparklinesLine } from "react-sparklines";
+import { formatNumber, formatSignedPercent } from "~/i18n/format";
+import { useI18n } from "~/i18n/I18nProvider";
 import type { YahooFinanceChartResponse } from "~/types/types";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-const compact = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 function SparkCard({
   data,
@@ -16,6 +16,7 @@ function SparkCard({
   data: YahooFinanceChartResponse;
   index: number;
 }) {
+  const { locale, t } = useI18n();
   const result = data.chart.result[0];
   if (result === undefined) {
     throw new Error("ETF chart data is missing");
@@ -30,19 +31,28 @@ function SparkCard({
   const prev = meta.chartPreviousClose;
   const changePct = prev ? ((meta.regularMarketPrice - prev) / prev) * 100 : 0;
 
+  const compact = useMemo(
+    () => (value: number) =>
+      formatNumber(locale, value, { maximumFractionDigits: 0 }),
+    [locale],
+  );
+
   const stats = useMemo(
     () => [
       {
-        label: "Day high",
-        value: `$${compact.format(meta.regularMarketDayHigh)}`,
+        label: t("etfs.stats.dayHigh"),
+        value: `$${compact(meta.regularMarketDayHigh)}`,
       },
       {
-        label: "Day low",
-        value: `$${compact.format(meta.regularMarketDayLow)}`,
+        label: t("etfs.stats.dayLow"),
+        value: `$${compact(meta.regularMarketDayLow)}`,
       },
-      { label: "Volume", value: compact.format(meta.regularMarketVolume) },
+      {
+        label: t("etfs.stats.volume"),
+        value: compact(meta.regularMarketVolume),
+      },
     ],
-    [meta],
+    [compact, meta, t],
   );
 
   return (
@@ -60,7 +70,7 @@ function SparkCard({
       {/* Bullish / bearish corner wash */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-16 -right-14 size-40 rounded-full blur-3xl transition-opacity duration-500"
+        className="pointer-events-none absolute -end-14 -top-16 size-40 rounded-full blur-3xl transition-opacity duration-500"
         style={{
           background: isBullish ? "var(--glow-2)" : "var(--glow-3)",
           opacity: 0.9,
@@ -94,14 +104,17 @@ function SparkCard({
               : "color-mix(in srgb, var(--down) 15%, transparent)",
           }}
         >
-          {changePct >= 0 ? "+" : ""}
-          {changePct.toFixed(2)}%
+          {formatSignedPercent(locale, changePct)}
         </span>
       </header>
 
       <div className="relative mt-4 flex items-end justify-between gap-2">
         <span className="num text-fg text-[26px] leading-none font-extrabold tracking-tight tabular-nums">
-          ${meta.regularMarketPrice.toFixed(2)}
+          $
+          {formatNumber(locale, meta.regularMarketPrice, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
         </span>
         <span className="text-fg-3 text-[10px] font-semibold tracking-[0.12em] uppercase">
           USD

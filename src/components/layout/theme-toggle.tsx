@@ -1,5 +1,6 @@
 import { setThemeCookie } from "~/app/actions";
 import { Themes } from "~/constants/constants";
+import { useI18n } from "~/i18n/I18nProvider";
 import type { AppTheme } from "~/types/types";
 
 /**
@@ -18,7 +19,10 @@ export default function ThemeToggle({
   theme: AppTheme;
   showLabel?: boolean;
 }) {
+  const { t } = useI18n();
   const next = theme === Themes.dark ? Themes.light : Themes.dark;
+  const nextLabel = next === Themes.dark ? t("common.dark") : t("common.light");
+  const label = t("common.switchTo", nextLabel);
 
   async function toggle() {
     document.documentElement.classList.toggle("dark", next === Themes.dark);
@@ -32,8 +36,8 @@ export default function ThemeToggle({
     <button
       type="button"
       onClick={toggle}
-      aria-label={`Switch to ${next} theme`}
-      title={`Switch to ${next} theme`}
+      aria-label={label}
+      title={label}
       className="group border-line bg-surface-2/70 text-fg-2 hover:border-brand/50 hover:text-fg relative flex h-10 items-center gap-2.5 overflow-hidden rounded-full border px-3 backdrop-blur-md transition-all duration-300 active:scale-95"
     >
       <span className="via-brand/15 pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent to-transparent transition-transform duration-700 group-hover:translate-x-full" />
@@ -80,8 +84,8 @@ export default function ThemeToggle({
       </span>
 
       {showLabel && (
-        <span className="relative text-xs font-semibold tracking-wide capitalize">
-          {theme}
+        <span className="relative text-xs font-semibold tracking-wide">
+          {nextLabel}
         </span>
       )}
     </button>

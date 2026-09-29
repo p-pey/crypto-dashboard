@@ -1,10 +1,11 @@
 import type { PropsWithChildren } from "react";
+import { cookies } from "next/headers";
+
 import AppFooter from "./footer";
 import AppHeader from "./header";
 import Sidebar from "./sidebar";
-import type { AppTheme } from "~/types/types";
 import { DEFAULT_APP_THEME } from "~/constants/constants";
-import { cookies } from "next/headers";
+import type { AppTheme } from "~/types/types";
 
 export default async function AppShell({ children }: PropsWithChildren) {
   const cookie = await cookies();
@@ -26,7 +27,7 @@ export default async function AppShell({ children }: PropsWithChildren) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-3.5 sm:gap-4">
           <AppHeader theme={theme} />
-          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pr-0.5 pb-1">
+          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pe-0.5 pb-1">
             {children}
           </main>
           <AppFooter />

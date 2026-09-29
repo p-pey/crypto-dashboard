@@ -4,16 +4,28 @@ import type {
 } from "~/services/iran/iran.types";
 
 /**
- * Assets tracked on every exchange.
+ * Assets tracked with a live order book and websocket on every exchange.
  *
- * `digitalGold` is a placeholder until the real ticker published by the
- * exchanges is known - edit the `symbols` entries below once it is, the UI
- * picks up the change with no other edits.
+ * Only XAUT is treated as gold here: none of the four exchanges currently list
+ * a physical 18k gold market (`GOLD18IRT` answers 400 on Nobitex, 422 on
+ * Wallex and 404 on Bitpin and Tabdeal), so 18k gold is sourced from
+ * nerkh.io instead and shows up as a single board row rather than four dead
+ * ones. Everything else these exchanges list arrives through the wide Wallex
+ * market list.
  */
 export const IR_ASSETS: IrAssetConfig[] = [
-  { id: "usdt", label: "USDT / IRT", kind: "fiat" },
-  { id: "xaut", label: "XAUT / IRT", kind: "gold" },
-  { id: "digitalGold", label: "Digital Gold / IRT", kind: "gold" },
+  {
+    id: "usdt",
+    label: "USDT / IRT",
+    labelKey: "irPrice.assets.usdt",
+    kind: "fiat",
+  },
+  {
+    id: "xaut",
+    label: "XAUT / IRT",
+    labelKey: "irPrice.assets.xaut",
+    kind: "gold",
+  },
 ];
 
 /**
@@ -43,22 +55,12 @@ const XAUT_SYMBOLS = {
   tabdeal: [{ symbol: "XAUT_IRT", quoteScale: 10, streamSymbol: "xautirt" }],
 } as const;
 
-const DIGITAL_GOLD_SYMBOLS = {
-  nobitex: [{ symbol: "GOLD18IRT", quoteScale: 1, streamSymbol: "gold18irt" }],
-  wallex: [{ symbol: "GOLD18IRT", quoteScale: 1 }],
-  bitpin: [{ symbol: "GOLD18_IRT", quoteScale: 10 }],
-  tabdeal: [
-    { symbol: "GOLD18_IRT", quoteScale: 10, streamSymbol: "gold18irt" },
-  ],
-} as const;
-
 function symbolsOf(
   id: "nobitex" | "wallex" | "bitpin" | "tabdeal",
 ): IrExchangeConfig["symbols"] {
   return {
     usdt: [...USDT_SYMBOLS[id]],
     xaut: [...XAUT_SYMBOLS[id]],
-    digitalGold: [...DIGITAL_GOLD_SYMBOLS[id]],
   };
 }
 
@@ -100,7 +102,7 @@ export const IR_EXCHANGES: IrExchangeConfig[] = [
     socket: {
       url: "wss://centrifugo.bitpin.ir/connection/websocket",
       protocol: "centrifugo",
-      stream: (symbol) => `orderbook:${symbol}`,
+      stream: (symbol) => `public:orderbook:${symbol}`,
     },
     symbols: symbolsOf("bitpin"),
   },

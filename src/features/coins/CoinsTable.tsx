@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useI18n } from "~/i18n/I18nProvider";
 import type { PriceChange } from "~/services/binance/BinanceSocketService.types";
 import { COLORS } from "~/styles/colors";
 
@@ -48,6 +49,7 @@ export default function CoinsTable({
   rows: PriceChange[];
   loading: boolean;
 }) {
+  const { t } = useI18n();
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
@@ -60,10 +62,10 @@ export default function CoinsTable({
       <div className="border-line/70 flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4">
         <div>
           <h2 className="text-fg text-[15px] font-bold tracking-tight">
-            Spot markets
+            {t("markets.spotMarkets")}
           </h2>
           <p className="text-fg-3 text-[12px]">
-            Live Binance ticker · updates in place
+            {t("markets.spotMarketsHint")}
           </p>
         </div>
 
@@ -73,20 +75,28 @@ export default function CoinsTable({
             <span className="bg-mint relative inline-flex size-1.5 rounded-full" />
           </span>
           <span className="text-fg-2 text-[11px] font-semibold">
-            {loading ? "Syncing" : `${rows.length} pairs`}
+            {loading ? t("markets.syncing") : t("markets.pairs", rows.length)}
           </span>
         </div>
       </div>
 
       <div className="max-h-[calc(100dvh-260px)] overflow-y-auto">
-        <table className="w-full border-collapse text-left">
+        <table className="w-full border-collapse text-start">
           <thead className="bg-surface-2/95 sticky top-0 z-10 backdrop-blur-sm">
             <tr className="text-fg-3 text-[10.5px] font-bold tracking-[0.12em] uppercase">
               <th className="w-14 px-5 py-3 font-bold">#</th>
-              <th className="px-3 py-3 font-bold">Asset</th>
-              <th className="px-3 py-3 text-right font-bold">Price (USDT)</th>
-              <th className="px-3 py-3 text-right font-bold">Δ USD 24h</th>
-              <th className="px-5 py-3 text-right font-bold">Δ % 24h</th>
+              <th className="px-3 py-3 font-bold">
+                {t("markets.columns.symbol")}
+              </th>
+              <th className="px-3 py-3 text-end font-bold">
+                {t("markets.columns.price")}
+              </th>
+              <th className="px-3 py-3 text-end font-bold">
+                {t("markets.columns.changeUsd")}
+              </th>
+              <th className="px-5 py-3 text-end font-bold">
+                {t("markets.columns.change")}
+              </th>
             </tr>
           </thead>
 
@@ -116,7 +126,7 @@ export default function CoinsTable({
                 >
                   <td className="relative px-5 py-3">
                     <span
-                      className={`absolute inset-y-0 left-0 w-[3px] rounded-r-full bg-gradient-to-b transition-opacity duration-300 ${
+                      className={`absolute inset-y-0 start-0 w-[3px] rounded-e-full bg-gradient-to-b transition-opacity duration-300 ${
                         up ? "from-mint to-cyan" : "from-rose to-amber"
                       } ${isHot ? "opacity-100" : "opacity-0"}`}
                     />
@@ -157,11 +167,11 @@ export default function CoinsTable({
                     </div>
                   </td>
 
-                  <td className="num text-fg px-3 py-3 text-right text-[13.5px] font-semibold tabular-nums">
+                  <td className="num text-fg px-3 py-3 text-end text-[13.5px] font-semibold tabular-nums">
                     {row.price}
                   </td>
 
-                  <td className="px-3 py-3 text-right">
+                  <td className="px-3 py-3 text-end">
                     <span
                       className="num text-[13px] font-medium tabular-nums"
                       style={{ color: up ? "var(--up)" : "var(--down)" }}
@@ -170,7 +180,7 @@ export default function CoinsTable({
                     </span>
                   </td>
 
-                  <td className="px-5 py-3 text-right">
+                  <td className="px-5 py-3 text-end">
                     <Delta value={row.change} />
                   </td>
                 </motion.tr>
@@ -182,7 +192,9 @@ export default function CoinsTable({
         {rows.length === 0 && (
           <div className="grid place-items-center gap-2 px-6 py-16">
             <div className="border-line border-t-brand size-8 animate-spin rounded-full border-2" />
-            <p className="text-fg-3 text-[13px]">Waiting for the first tick…</p>
+            <p className="text-fg-3 text-[13px]">
+              {t("markets.waitingFirstTick")}
+            </p>
           </div>
         )}
       </div>

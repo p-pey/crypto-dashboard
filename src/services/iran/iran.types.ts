@@ -1,6 +1,6 @@
 export type IrExchangeId = "nobitex" | "wallex" | "bitpin" | "tabdeal";
 
-export type IrAssetId = "usdt" | "xaut" | "digitalGold";
+export type IrAssetId = "usdt" | "xaut";
 
 export type IrSocketProtocol = "centrifugo" | "socketio" | "jsonrpc";
 
@@ -13,9 +13,9 @@ export type IrAssetKind = "fiat" | "gold";
 /**
  * A symbol candidate for a given asset on a given exchange.
  *
- * `quoteScale` converts the exchange native quote unit into IRT (rial).
- * Wallex for example lists the same market under both `_IRT` and `_TMN`,
- * and a Toman quoted market needs to be multiplied by 100.
+ * `quoteScale` converts the exchange native quote unit into Rial. Wallex for
+ * example lists the same market under both `_IRT` and `_TMN`, and a Toman
+ * quoted market needs to be multiplied by 10.
  */
 export type IrSymbolSpec = {
   symbol: string;
@@ -29,7 +29,10 @@ export type IrSymbolSpec = {
 
 export type IrAssetConfig = {
   id: IrAssetId;
+  /** Short technical label, kept for logs and the URL. */
   label: string;
+  /** Dictionary key for the human readable name shown in the UI. */
+  labelKey: "irPrice.assets.usdt" | "irPrice.assets.xaut";
   kind: IrAssetKind;
 };
 

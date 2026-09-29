@@ -3,15 +3,21 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "~/constants/navigation";
+import {
+  NAV_ITEMS,
+  navHref,
+  navKeyForPathname,
+  navPathname,
+} from "~/constants/navigation";
+import { useI18n } from "~/i18n/I18nProvider";
 
 const spring = { type: "spring", stiffness: 380, damping: 32 } as const;
 
 export default function AppSidebar() {
+  const { locale, t } = useI18n();
   const pathname = usePathname();
-  const activeHref = NAV_ITEMS.find((item) =>
-    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
-  )?.href;
+  const current = navPathname(pathname);
+  const activeKey = navKeyForPathname(current);
 
   return (
     <div className="glass relative flex h-full flex-col overflow-hidden rounded-[22px]">
@@ -21,7 +27,7 @@ export default function AppSidebar() {
       <div className="via-brand/60 pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent" />
 
       <Link
-        href="/"
+        href={navHref(locale, "/")}
         className="group relative flex items-center gap-3 px-5 py-[18px]"
       >
         <motion.span
@@ -45,22 +51,22 @@ export default function AppSidebar() {
 
         <span className="min-w-0">
           <span className="text-gradient block truncate text-[15px] leading-tight font-bold tracking-tight">
-            Obsidian
+            {t("brand.name")}
           </span>
           <span className="text-fg-3 block truncate text-[10.5px] font-medium tracking-[0.14em] uppercase">
-            Market Terminal
+            {t("brand.tagline")}
           </span>
         </span>
       </Link>
 
       <nav className="relative flex-1 px-3 pb-3">
         <p className="text-fg-3 px-3 pt-2 pb-2.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
-          Navigate
+          {t("nav.section")}
         </p>
 
         <ul className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
-            const active = item.href === activeHref;
+            const active = item.key === activeKey;
             const Icon = item.icon;
 
             return (
@@ -74,7 +80,7 @@ export default function AppSidebar() {
                 )}
 
                 <Link
-                  href={item.href}
+                  href={navHref(locale, item.href)}
                   aria-current={active ? "page" : undefined}
                   className="group relative z-10 flex items-center gap-3 rounded-[13px] px-3 py-2.5 transition-colors duration-300"
                 >
@@ -94,10 +100,10 @@ export default function AppSidebar() {
                         active ? "text-fg" : "text-fg-2 group-hover:text-fg"
                       }`}
                     >
-                      {item.label}
+                      {t(`nav.${item.key}.label`)}
                     </span>
                     <span className="text-fg-3 block truncate text-[10.5px]">
-                      {item.hint}
+                      {t(`nav.${item.key}.hint`)}
                     </span>
                   </span>
 
@@ -124,10 +130,10 @@ export default function AppSidebar() {
           </span>
           <div className="min-w-0">
             <p className="text-fg truncate text-[11.5px] font-semibold">
-              Systems nominal
+              {t("common.systemsNominal")}
             </p>
             <p className="text-fg-3 truncate text-[10px]">
-              Websocket feed active
+              {t("common.feedActive")}
             </p>
           </div>
         </div>

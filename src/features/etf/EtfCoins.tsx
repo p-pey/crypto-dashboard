@@ -2,16 +2,12 @@
 
 import { Select } from "antd";
 import { Coins } from "lucide-react";
+import { useI18n } from "~/i18n/I18nProvider";
+import type { TranslationKey } from "~/i18n/dictionaries/types";
 
-export const ETF_ASSETS = [
-  { value: "BTC", label: "Bitcoin" },
-  { value: "ETH", label: "Ethereum" },
-  { value: "SOL", label: "Solana" },
-  { value: "XRP", label: "XRP" },
-  { value: "DOGE", label: "Dogecoin" },
-] as const;
+export const ETF_ASSETS = ["BTC", "ETH", "SOL", "XRP", "DOGE"] as const;
 
-export type EtfAsset = (typeof ETF_ASSETS)[number]["value"];
+export type EtfAsset = (typeof ETF_ASSETS)[number];
 
 export default function EtfCoins({
   value,
@@ -20,23 +16,26 @@ export default function EtfCoins({
   value: EtfAsset;
   onChange: (value: EtfAsset) => void;
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
         <h2 className="text-fg flex items-center gap-2 text-[16px] font-bold tracking-tight">
           <Coins className="text-brand-2 size-[18px]" strokeWidth={2.2} />
-          Daily ETF flow
+          {t("etfs.title")}
         </h2>
-        <p className="text-fg-3 mt-0.5 text-[12px]">
-          Intraday price action across spot ETF products
-        </p>
+        <p className="text-fg-3 mt-0.5 text-[12px]">{t("etfs.subtitle")}</p>
       </div>
 
       <Select<EtfAsset>
         value={value}
         onChange={onChange}
         style={{ width: 220 }}
-        options={ETF_ASSETS.map((a) => ({ value: a.value, label: a.label }))}
+        options={ETF_ASSETS.map((asset) => ({
+          value: asset,
+          label: t(`etfs.assets.${asset}` as TranslationKey),
+        }))}
       />
     </div>
   );
