@@ -1,5 +1,6 @@
 import {
   CandlestickChart,
+  ChartColumnIncreasing,
   ChartPie,
   Droplets,
   LineChart,
@@ -26,6 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "etfs", href: "/etfs", icon: CandlestickChart },
   { key: "irPrice", href: "/ir-price", icon: Droplets },
   { key: "analyze", href: "/analyze", icon: LineChart },
+  { key: "charts", href: "/charts", icon: ChartColumnIncreasing },
 ];
 
 /** Longest prefix first so `/ir-price` cannot swallow a hypothetical `/ir-price-x`. */

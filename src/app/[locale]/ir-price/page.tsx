@@ -15,7 +15,6 @@ const IrSocket = AppContainer.resolve(IrPriceSocketService);
 export default function IrPricePage() {
   const { t } = useI18n();
   const [tickers, setTickers] = useState<IrTicker[]>([]);
-  const [live, setLive] = useState(false);
   const [unit, setUnit] = useState<QuoteUnit>("rial");
   const startedRef = useRef(false);
 
@@ -52,16 +51,7 @@ export default function IrPricePage() {
   });
 
   useEffect(() => {
-    const unsubscribe = IrSocket.subscribe((next) => {
-      if (
-        next.some(
-          (ticker) => ticker.status === "live" && ticker.source === "socket",
-        )
-      ) {
-        setLive(true);
-      }
-      setTickers(next);
-    });
+    const unsubscribe = IrSocket.subscribe((next) => setTickers(next));
 
     return () => {
       unsubscribe();
@@ -138,7 +128,7 @@ export default function IrPricePage() {
       transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       className="panel px-5 py-5"
     >
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
+      <header className="mb-5">
         <div className="max-w-3xl">
           <h2 className="text-fg text-[16px] font-bold tracking-tight">
             {t("irPrice.title")}
@@ -147,21 +137,6 @@ export default function IrPricePage() {
             {t("irPrice.description")}
           </p>
         </div>
-
-        <span className="border-line bg-surface-2/70 inline-flex items-center gap-2 rounded-full border px-3 py-1.5">
-          <span className="relative flex size-1.5">
-            {live && (
-              <span className="bg-mint absolute inline-flex size-full animate-ping rounded-full opacity-70" />
-            )}
-            <span
-              className="relative inline-flex size-1.5 rounded-full"
-              style={{ background: live ? "var(--mint)" : "var(--amber)" }}
-            />
-          </span>
-          <span className="text-fg-2 text-[11px] font-semibold">
-            {live ? t("irPrice.websocketLive") : t("irPrice.restOnly")}
-          </span>
-        </span>
       </header>
 
       <div className="flex flex-col gap-4">
@@ -182,7 +157,6 @@ export default function IrPricePage() {
           loading={isLoading}
           unit={unit}
           onUnit={setUnit}
-          live={live}
         />
       </div>
     </motion.div>

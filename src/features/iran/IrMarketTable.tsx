@@ -34,7 +34,6 @@ type Props = {
   loading: boolean;
   unit: QuoteUnit;
   onUnit: (unit: QuoteUnit) => void;
-  live: boolean;
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -54,7 +53,6 @@ export default function IrMarketTable({
   loading,
   unit,
   onUnit,
-  live,
 }: Props) {
   const { locale, t } = useI18n();
   const [category, setCategory] = useState<CategoryFilter>("all");
@@ -95,7 +93,6 @@ export default function IrMarketTable({
 
     return {
       rows: allRows.length,
-      live: allRows.filter((row) => row.status === "live").length,
       sources: availableSources.length,
       bestUsdt: cheapest(usdt),
       // 18k gold is not listed on any of the exchanges, so the reference rate
@@ -113,7 +110,7 @@ export default function IrMarketTable({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
           label={t("irPrice.stats.instruments")}
           value={formatNumber(locale, stats.rows, { maximumFractionDigits: 0 })}
@@ -123,11 +120,6 @@ export default function IrMarketTable({
           label={t("irPrice.stats.sources")}
           value={`${stats.sources} / ${MARKET_SOURCES.length}`}
           accent="var(--cyan)"
-        />
-        <Stat
-          label={t("irPrice.stats.transport")}
-          value={live ? t("irPrice.stats.socket") : t("irPrice.stats.poll")}
-          accent={live ? "var(--mint)" : "var(--amber)"}
         />
         <Stat
           label={t("irPrice.stats.bestUsdt")}

@@ -1,4 +1,9 @@
-import { NEWS_SOURCES, type NewsSourceId } from "~/constants/newsSources";
+import {
+  BROWSER_UA,
+  NEWS_SOURCES,
+  type NewsSourceId,
+  type NewsTier,
+} from "~/constants/newsSources";
 import { AxiosService } from "~/lib/axios";
 import { AppInject, AppSignleton } from "~/lib/container";
 
@@ -19,15 +24,10 @@ export const NEWS_TTL_MS = 5 * 60_000;
 /** Articles older than a day have no bearing on an intraday forecast. */
 const MAX_ARTICLE_AGE_MS = 30 * 60 * 60_000;
 
-const PER_SOURCE = 40;
+const PER_SOURCE = 30;
 
-/**
- * nerkh.io (and at least one other Iranian host) rejects anything that does not
- * look like a browser with a plain 403, so the crawler sends a desktop UA
- * rather than axios' default `axios/1.x`.
- */
-const BROWSER_UA =
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+/** Cap on headlines held in memory, so a noisy tier cannot crowd out the rest. */
+const MAX_ARTICLES = 400;
 
 const FEED_HEADERS: Record<string, string> = {
   Accept:
@@ -36,16 +36,19 @@ const FEED_HEADERS: Record<string, string> = {
   "User-Agent": BROWSER_UA,
 };
 
+const TIERS: NewsTier[] = ["iran", "usOfficial", "usWires", "regional"];
+
 type Cached = { snapshot: NewsSnapshot; expiresAt: number };
 
 /**
- * Aggregates Iranian news agency feeds and turns them into a macro reading.
+ * Aggregates Iranian, US official, US wires and regional feeds, then turns them
+ * into a macro reading.
  *
  * Every outlet is fetched independently and concurrently, so one dead feed
- * costs only its own share of the coverage figure. The composite score is
- * recency and relevance weighted, and normalised against the driver weights so
- * the eight channels stay comparable. There is no model and no API key: every
- * number in the output traces back to a headline in the feed.
+ * costs only its own share of the coverage figure. Coverage is also reported
+ * per tier, which is what tells you whether the Iranian press went quiet or the
+ * whole tier is broken. The composite score is recency and relevance weighted;
+ * there is no model and no API key, so every number traces back to a headline.
  */
 @AppSignleton()
 export default class NewsCrawlerService {
@@ -76,15 +79,13 @@ export default class NewsCrawlerService {
       NEWS_SOURCES.map(async (source): Promise<ScoredEntry> => {
         try {
           const xml = await this.fetchFeed(source.feedUrl);
-          const articles = mapFeed(source.id, xml, {
-            perSource,
-            now,
-            maxAgeMs,
-          });
+          const articles = mapFeed(source, xml, { perSource, now, maxAgeMs });
           return {
             source: source.id,
+            tier: source.tier,
             status: {
               source: source.id,
+              tier: source.tier,
               ok: articles.length > 0,
               count: articles.length,
               // An empty result is usually a stale feed rather than an outage,
@@ -100,8 +101,10 @@ export default class NewsCrawlerService {
         } catch (error) {
           return {
             source: source.id,
+            tier: source.tier,
             status: {
               source: source.id,
+              tier: source.tier,
               ok: false,
               count: 0,
               error: describeError(error),
@@ -118,7 +121,7 @@ export default class NewsCrawlerService {
       settled
         .flatMap((entry) => entry.articles)
         .sort((a, b) => b.publishedAt - a.publishedAt),
-    ).slice(0, 180);
+    ).slice(0, MAX_ARTICLES);
 
     const unavailable = settled
       .filter((entry) => !entry.status.ok)
@@ -152,6 +155,8 @@ export default class NewsCrawlerService {
       drivers: scoreDrivers(articles, settled),
       coverage: liveWeight / totalWeight,
       aggregate: aggregateTone(articles, now),
+      tierCoverage: tierCoverage(settled),
+      riskAggregate: aggregateRisk(articles, now),
     };
 
     this.cache = { snapshot, expiresAt: now + NEWS_TTL_MS };
@@ -163,7 +168,6 @@ export default class NewsCrawlerService {
       headers: FEED_HEADERS,
       timeout: 10_000,
       responseType: "text",
-      // A couple of the outlets answer 200 with a redirect interstitial.
       maxRedirects: 3,
     });
 
@@ -185,6 +189,7 @@ function recencyWeight(publishedAt: number, now: number): number {
 
 type ScoredEntry = {
   source: NewsSourceId;
+  tier: NewsTier;
   articles: NewsArticle[];
   weight: number;
   status: NewsFeedStatus;
@@ -258,6 +263,43 @@ function aggregateTone(articles: NewsArticle[], now: number): number {
   return Math.tanh(total / 6) * 100;
 }
 
+/**
+ * Global risk appetite, computed from the same weighting as the rial tone but
+ * over the separate `riskScore`. Negative is risk-off.
+ */
+function aggregateRisk(articles: NewsArticle[], now: number): number {
+  let total = 0;
+  let weight = 0;
+  for (const article of articles) {
+    if (article.riskScore === 0) continue;
+    const w = recencyWeight(article.publishedAt, now);
+    total += article.riskScore * w;
+    weight += w;
+  }
+  if (weight === 0) return 0;
+  // `tanh` rather than a hard clamp: a war-dominated feed should read strongly
+  // risk-off without pinning at −100 and losing all resolution.
+  return Math.tanh(total / weight / 25) * 100;
+}
+
+function tierCoverage(entries: ScoredEntry[]): Record<NewsTier, number> {
+  const out = { iran: 0, usOfficial: 0, usWires: 0, regional: 0 } as Record<
+    NewsTier,
+    number
+  >;
+
+  for (const tier of TIERS) {
+    const inTier = entries.filter((entry) => entry.tier === tier);
+    const total = inTier.reduce((sum, entry) => sum + entry.weight, 0);
+    const live = inTier
+      .filter((entry) => entry.status.ok && entry.articles.length > 0)
+      .reduce((sum, entry) => sum + entry.weight, 0);
+    out[tier] = total === 0 ? 0 : live / total;
+  }
+
+  return out;
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -271,6 +313,7 @@ function emptySnapshot(error: string | null): NewsSnapshot {
       ok: false,
       count: 0,
       error,
+      tier: source.tier,
     })),
     unavailable: NEWS_SOURCES.map((source) => source.id),
     stale: false,
@@ -284,6 +327,8 @@ function emptySnapshot(error: string | null): NewsSnapshot {
     })),
     coverage: 0,
     aggregate: 0,
+    tierCoverage: { iran: 0, usOfficial: 0, usWires: 0, regional: 0 },
+    riskAggregate: 0,
   };
 }
 

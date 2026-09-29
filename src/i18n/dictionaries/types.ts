@@ -30,7 +30,7 @@ export type Translate = (
 export type InstrumentKey = keyof Dictionary["nerkh"]["instruments"];
 
 /** Sidebar route keys, used to look up nav labels from the dictionary. */
-export type NavKey = "markets" | "etfs" | "irPrice" | "analyze";
+export type NavKey = "markets" | "etfs" | "irPrice" | "analyze" | "charts";
 
 /** Ant Design status keys reused across the Iranian price widgets. */
 export type IrStatusKey = "live" | "connecting" | "stale" | "error";

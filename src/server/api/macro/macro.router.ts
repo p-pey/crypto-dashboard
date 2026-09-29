@@ -36,6 +36,8 @@ export const macroRouter = createTRPCRouter({
         drivers: snapshot.drivers,
         coverage: snapshot.coverage,
         aggregate: snapshot.aggregate,
+        tierCoverage: snapshot.tierCoverage,
+        riskAggregate: snapshot.riskAggregate,
         fetchedAt: snapshot.fetchedAt,
         stale: snapshot.stale,
         error: snapshot.error,
