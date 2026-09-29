@@ -1,11 +1,9 @@
 import { AppSignleton } from "~/lib/container";
-import type { Coin } from "~/types/types";
 import type { PriceChange } from "~/services/binance/BinanceSocketService.types";
 
 @AppSignleton()
 export class CoinsRepository {
   private readonly _coinsRepo = new Map<string, PriceChange>();
-  constructor() {}
 
   getCoin(id: string) {
     return this._coinsRepo.get(id);

@@ -1,12 +1,469 @@
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens — Obsidian (default) & Pearl
+   Values are mirrored in src/styles/colors.ts for the antd token bridge.
+--------------------------------------------------------------------------- */
+
+:root {
+  --bg-base: #f4f5fa;
+  --bg-deep: #eceef6;
+  --surface: #ffffff;
+  --surface-2: #f7f8fc;
+  --surface-3: #eef0f7;
+  --border: #e3e6f0;
+  --border-strong: #d2d7e6;
+
+  --text: #0c0e17;
+  --text-2: #545c72;
+  --text-3: #8a92a8;
+
+  --brand: #5b4be0;
+  --brand-2: #8b7bff;
+  --brand-soft: #ece9ff;
+  --on-brand: #ffffff;
+
+  --cyan: #0891b2;
+  --mint: #059669;
+  --amber: #d97706;
+  --rose: #e11d48;
+
+  --up: #059669;
+  --down: #e11d48;
+  --up-soft: #e3f7ef;
+  --down-soft: #fdeaef;
+
+  --glow-1: rgb(91 75 224 / 0.16);
+  --glow-2: rgb(8 145 178 / 0.14);
+  --glow-3: rgb(244 114 182 / 0.1);
+
+  --shadow-color: 220 40% 20%;
+  --ring: rgb(91 75 224 / 0.35);
+
+  --grid-line: rgb(12 14 23 / 0.045);
 }
 
-html,
-body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+.dark {
+  --bg-base: #08090e;
+  --bg-deep: #05060a;
+  --surface: #10121a;
+  --surface-2: #161925;
+  --surface-3: #1e2230;
+  --border: #23273380;
+  --border-strong: #333a4d;
+
+  --text: #eef1f8;
+  --text-2: #9aa3b8;
+  --text-3: #6b7490;
+
+  --brand: #6d5df6;
+  --brand-2: #8b7bff;
+  --brand-soft: #1c1937;
+  --on-brand: #ffffff;
+
+  --cyan: #22d3ee;
+  --mint: #2dd4a7;
+  --amber: #f5a524;
+  --rose: #ff5c7a;
+
+  --up: #2dd4a7;
+  --down: #ff5c7a;
+  --up-soft: #0f2a24;
+  --down-soft: #2d1420;
+
+  --glow-1: rgb(109 93 246 / 0.28);
+  --glow-2: rgb(34 211 238 / 0.18);
+  --glow-3: rgb(244 114 182 / 0.12);
+
+  --shadow-color: 240 60% 2%;
+  --ring: rgb(109 93 246 / 0.45);
+
+  --grid-line: rgb(255 255 255 / 0.04);
+}
+
+@theme inline {
+  --color-bg: var(--bg-base);
+  --color-bg-deep: var(--bg-deep);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+
+  --color-fg: var(--text);
+  --color-fg-2: var(--text-2);
+  --color-fg-3: var(--text-3);
+
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+
+  --color-cyan: var(--cyan);
+  --color-mint: var(--mint);
+  --color-amber: var(--amber);
+  --color-rose: var(--rose);
+
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-up-soft: var(--up-soft);
+  --color-down-soft: var(--down-soft);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
+
+  --radius-xl2: 1.25rem;
+
+  --shadow-glow: 0 0 0 1px var(--ring), 0 18px 50px -18px var(--glow-1);
+  --shadow-panel:
+    0 1px 0 0 var(--border), 0 24px 60px -32px hsl(var(--shadow-color) / 0.9);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-fade-up: fade-up 0.6s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.5s var(--ease-out-expo) both;
+  --animate-pulse-soft: pulse-soft 2.8s ease-in-out infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-marquee: marquee 48s linear infinite;
+  --animate-float: float 9s ease-in-out infinite;
+  --animate-drift: drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 var(--ring);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6%, -4%, 0) scale(1.15);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+/* --------------------------------- base ----------------------------------
+   Everything below is wrapped in a cascade layer on purpose. Unlayered CSS
+   beats ALL layered CSS regardless of specificity, so leaving these rules
+   bare would make `* { padding: 0 }` override every Tailwind `px-*`/`py-*`
+   utility in the app. `base` and `components` are declared ahead of
+   `utilities` by Tailwind, so utilities still win where they should.
+------------------------------------------------------------------------- */
+
+@layer base {
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  html {
+    background: var(--bg-base);
+  }
+
+  body {
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition:
+      background-color 0.5s var(--ease-out-expo),
+      color 0.5s var(--ease-out-expo);
+  }
+
+  /* Scrollbars. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 40%, transparent);
+    color: var(--text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Ambient aurora mesh behind the whole app. */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 8% -10%, var(--glow-1), transparent 60%),
+      radial-gradient(1000px 640px at 100% 0%, var(--glow-2), transparent 62%),
+      radial-gradient(900px 600px at 50% 115%, var(--glow-3), transparent 60%),
+      var(--bg-base);
+  }
+
+  .aurora::after {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 72%);
+  }
+
+  /* Slowly drifting color orbs. Purely decorative, no pointer events. */
+  .orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(70px);
+    opacity: 0.55;
+    will-change: transform;
+  }
+
+  .orb-1 {
+    width: 34rem;
+    height: 34rem;
+    top: -14rem;
+    left: -8rem;
+    background: radial-gradient(circle, var(--glow-1), transparent 70%);
+    animation: var(--animate-drift);
+  }
+
+  .orb-2 {
+    width: 28rem;
+    height: 28rem;
+    top: 8%;
+    right: -10rem;
+    background: radial-gradient(circle, var(--glow-2), transparent 70%);
+    animation: var(--animate-float), var(--animate-drift);
+    animation-duration: 11s, 27s;
+    animation-direction: alternate, alternate-reverse;
+  }
+
+  .orb-3 {
+    width: 24rem;
+    height: 24rem;
+    bottom: -12rem;
+    left: 42%;
+    background: radial-gradient(circle, var(--glow-3), transparent 70%);
+    animation: var(--animate-float);
+    animation-duration: 14s;
+  }
+
+  /* Slow rotating conic halo, used behind the wordmark. */
+  .halo {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .halo::before {
+    content: "";
+    position: absolute;
+    inset: -140%;
+    z-index: -1;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      var(--brand) 70deg,
+      var(--cyan) 150deg,
+      transparent 230deg,
+      var(--mint) 300deg,
+      transparent 360deg
+    );
+    opacity: 0.22;
+    filter: blur(50px);
+    animation: spin-slow 18s linear infinite;
+  }
+
+  /* Glass surface used by sidebar, header, cards, footer. */
+  .glass {
+    background: color-mix(in srgb, var(--surface) 78%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .panel {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl2);
+    box-shadow: var(--shadow-panel);
+    transition:
+      transform 0.4s var(--ease-out-expo),
+      border-color 0.4s var(--ease-out-expo),
+      box-shadow 0.4s var(--ease-out-expo);
+  }
+
+  .panel-hover:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--brand) 40%, var(--border));
+    box-shadow:
+      var(--shadow-panel),
+      0 28px 70px -34px var(--glow-1);
+  }
+
+  /* Gradient text for headings / wordmark. */
+  .text-gradient {
+    background: linear-gradient(
+      100deg,
+      var(--text) 0%,
+      var(--brand-2) 45%,
+      var(--cyan) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+  }
+
+  /* Hairline gradient border that survives border-radius clipping. */
+  .ring-gradient {
+    position: relative;
+  }
+
+  .ring-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--brand) 55%, transparent),
+      transparent 40%,
+      color-mix(in srgb, var(--cyan) 45%, transparent)
+    );
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+
+  /* Webkit scrollbars. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--border-strong) 70%, transparent);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--brand) 65%, transparent);
+    background-clip: content-box;
+  }
+}
+
+/* Honor the OS "reduce motion" setting for every decorative animation. */
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .halo::before {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

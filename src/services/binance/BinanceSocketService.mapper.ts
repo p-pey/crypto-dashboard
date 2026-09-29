@@ -3,11 +3,11 @@ import type { BinanceTicker, PriceChange } from "./BinanceSocketService.types";
 
 export class BinanceSocketServiceMapper {
   static BTCPrice: PriceChange["price"];
-  static coins: Map<string, PriceChange> = new Map();
+  static coins: Map<string, PriceChange> = new Map<string, PriceChange>();
   static mapCoinsToFindOrder(calledCoins: Coin[], target: BinanceTicker) {
     return calledCoins.find(
       (item) => `${item.symbol.toUpperCase()}USDT` === target.s,
-    ) as Coin;
+    )!;
   }
 
   static mapPriceToObject(price: BinanceTicker, targetCoin: Coin) {
@@ -18,16 +18,16 @@ export class BinanceSocketServiceMapper {
       key: price.s,
       order: targetCoin.order,
       image: targetCoin.image,
+      id: targetCoin.id,
+      name: targetCoin.name,
       symbol: price.s.replace("USDT", ""),
       price: parseFloat(price.c).toFixed(3),
       change: parseFloat(price.P).toFixed(2) + "%",
       changeUsd: parseFloat(price.p).toString(),
       divideToBTC:
-        price.s === "BTCUSDT"
+        price.s === "BTCUSDT" || !this.BTCPrice
           ? ""
-          : parseFloat(parseInt(price.c) / parseInt(this.BTCPrice))
-              .toFixed(4)
-              .toString(),
+          : (parseFloat(price.c) / parseFloat(this.BTCPrice)).toFixed(4),
     });
   }
   static mapCoinsToArray() {
@@ -37,7 +37,10 @@ export class BinanceSocketServiceMapper {
     return data.sort((a, b) => a.order - b.order);
   }
   static mapParseEvent(event: MessageEvent): BinanceTicker {
-    return JSON.parse(event.data).data;
+    const parsed = JSON.parse(event.data as string) as {
+      data: BinanceTicker;
+    };
+    return parsed.data;
   }
   static mapCoinsSymbolToGetUrlParam(coins: Coin[]) {
     return coins.map((coin) => coin.symbol.toLowerCase()).join("usdt@ticker/");

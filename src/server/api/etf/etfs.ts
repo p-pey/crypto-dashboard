@@ -1,74 +1,23 @@
-type TEtf = {
+import etfJson from "./etf.json";
+
+export type TEtf = {
   id: string;
   name: string;
 };
 
 export class Etf {
-  private readonly BTC_ETFS: TEtf[] = [];
-  private readonly ETH_ETFS: TEtf[] = [
-    {
-      id: "ETHA",
-      name: "iShares Ethereum Trust ETF",
-    },
-    {
-      id: "ETHE",
-      name: "Grayscale Ethereum Trust ETF",
-    },
-    {
-      id: "FETH",
-      name: "Fidelity Ethereum Fund",
-    },
-    {
-      id: "ETH",
-      name: "Grayscale Ethereum Mini Trust ETF",
-    },
-    {
-      id: "ETHW",
-      name: "Bitwise Ethereum ETF",
-    },
-    {
-      id: "ETHV",
-      name: "VanEck Ethereum ETF",
-    },
-    {
-      id: "EZET",
-      name: "Franklin Ethereum ETF",
-    },
-    {
-      id: "EETH",
-      name: "ProShares Ether ETF",
-    },
-    {
-      id: "QETH",
-      name: "Invesco Galaxy Ethereum ETF",
-    },
-    {
-      id: "CETH",
-      name: "21Shares Core Ethereum ETF",
-    },
-    {
-      id: "FUT",
-      name: "VanEck Ethereum Strategy ETF",
-    },
-    {
-      id: "ARKZ",
-      name: "ARK 21Shares Active Ethereum Futures Strategy ETF",
-    },
-    {
-      id: "AETH",
-      name: "Bitwise Trendwise Ether and Treasuries Rotation Strategy ETF",
-    },
-  ] as const;
-  private readonly SOL_ETFS: TEtf[] = [];
-  private readonly XRP_ETFS: TEtf[] = [];
-  private readonly DOGE_ETFS: TEtf[] = [];
+  private readonly BTC_ETFS: TEtf[];
+  private readonly ETH_ETFS: TEtf[];
+  private readonly SOL_ETFS: TEtf[];
+  private readonly XRP_ETFS: TEtf[];
+  private readonly DOGE_ETFS: TEtf[];
 
   constructor() {
-    this.BTC_ETFS = require("./etf.json").BTC;
-    this.ETH_ETFS = require("./etf.json").ETH;
-    this.SOL_ETFS = require("./etf.json").SOL;
-    this.XRP_ETFS = require("./etf.json").XRP;
-    this.DOGE_ETFS = require("./etf.json").DOGE;
+    this.BTC_ETFS = etfJson.BTC;
+    this.ETH_ETFS = etfJson.ETH;
+    this.SOL_ETFS = etfJson.SOL;
+    this.XRP_ETFS = etfJson.XRP;
+    this.DOGE_ETFS = etfJson.DOGE;
   }
   public getAll() {
     return [

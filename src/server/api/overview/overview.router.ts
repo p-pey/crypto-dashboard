@@ -7,7 +7,7 @@ import { OverviewMapper } from "./overview.mapper";
 const ApiService = AppContainer.resolve(AxiosService);
 
 export const overviewRouter = createTRPCRouter({
-  getFearAndGreedIndex: protectedProcedure.query(async ({ ctx }) => {
+  getFearAndGreedIndex: protectedProcedure.query(async () => {
     const { data } = await ApiService.get(
       "https://api.alternative.me/fng/?limit=0&format=json",
     );
@@ -15,7 +15,9 @@ export const overviewRouter = createTRPCRouter({
   }),
   getPrices: publicProcedure.query(async () => {
     const { data } = await ApiService.get<Coin[]>(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`,
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true`,
+      // CoinGecko rejects requests without a User-Agent outright.
+      { headers: { Accept: "application/json" } },
     );
     return OverviewMapper.mapCoinsToAddOrder(data);
   }),

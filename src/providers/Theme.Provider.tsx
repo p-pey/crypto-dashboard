@@ -1,29 +1,22 @@
-import { ConfigProvider, theme } from "antd";
+import { ConfigProvider, theme as antdTheme } from "antd";
 import type { PropsWithChildren } from "react";
-import { COLORS } from "~/styles/colors";
+import { buildAntdTheme } from "~/styles/colors";
 
-export default function ThemeProvider(
-  props: PropsWithChildren<{ theme: "dark" | "light" }>,
-) {
-  const activeThemeAlgorithm =
-    props.theme === "light" ? theme.defaultAlgorithm : theme.darkAlgorithm;
-  const colors = COLORS[props.theme];
+export default function ThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: "dark" | "light" }>) {
   return (
     <ConfigProvider
       theme={{
-        cssVar: true,
-        algorithm: activeThemeAlgorithm,
-        token: {
-          colorPrimary: colors.primary,
-          borderRadius: 4,
-          colorBgContainer: colors.secondary,
-          colorText: colors.trittary,
-          colorBorder: colors.fourthly,
-          padding: 8,
-        },
+        ...buildAntdTheme(theme),
+        algorithm:
+          theme === "light"
+            ? antdTheme.defaultAlgorithm
+            : antdTheme.darkAlgorithm,
       }}
     >
-      {props.children}
+      {children}
     </ConfigProvider>
   );
 }

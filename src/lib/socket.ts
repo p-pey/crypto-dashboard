@@ -40,7 +40,7 @@ export default class WebSocketService {
               this._ws = new WebSocket(url);
 
               this._ws.onmessage = (event: MessageEvent) => {
-                     const tickers: BinanceTicker[] = JSON.parse(event.data);
+                     const tickers = JSON.parse(event.data as string) as BinanceTicker[];
 
                      // Filter USDT pairs
                      const usdtPairs = tickers.filter(t => t.s.endsWith("USDT"));

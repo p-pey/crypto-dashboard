@@ -1,7 +1,27 @@
 import type { Themes } from "~/constants/constants";
 
 export type AppTheme = keyof typeof Themes;
-export type Coin = {
+export type YahooFinanceChartResponse = {
+  chart: {
+    result: Array<{
+      meta: {
+        symbol: string;
+        longName: string;
+        regularMarketPrice: number;
+        chartPreviousClose: number;
+        regularMarketDayHigh: number;
+        regularMarketDayLow: number;
+        regularMarketVolume: number;
+      };
+      timestamp: number[];
+      indicators: {
+        quote: Array<{
+          low: (number | null)[];
+        }>;
+      };
+    }>;
+  };
+};export type Coin = {
   // custom value
   order: number,
   price: string;

@@ -2,6 +2,8 @@ import { postRouter } from "~/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { overviewRouter } from "./overview/overview.router";
 import { EtfRouter } from "./etf/etf.router";
+import { iranRouter } from "./iran/iran.router";
+import { statusesRouter } from "./statuses/statuses.service";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +14,8 @@ export const appRouter = createTRPCRouter({
   post: postRouter,
   overview: overviewRouter,
   etf: EtfRouter,
+  iran: iranRouter,
+  statuses: statusesRouter,
 });
 
 // export type definition of API

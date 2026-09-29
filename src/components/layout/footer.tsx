@@ -1,17 +1,9 @@
-import { Footer } from "antd/lib/layout/layout";
+import PriceTicker from "~/components/price-ticker/PriceTicker";
 
-export default async function AppFooter() {
+export default function AppFooter() {
   return (
-    <Footer
-      className="fixed bottom-0 left-0 w-full"
-      style={{
-        background: "#001529",
-        color: "white",
-        padding: "8px 16px",
-        overflow: "hidden",
-      }}
-    >
-      {/* <PriceTicker /> */}
-    </Footer>
+    <footer className="shrink-0">
+      <PriceTicker />
+    </footer>
   );
 }

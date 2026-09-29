@@ -14,7 +14,7 @@ export default class BinanceService {
     @AppInject(WebSocketServiceToken) private _websocket: WebSocketService,
     @AppInject(CoinsRepository) private _coinsRepo: CoinsRepository,
   ) {
-    _coinsRepo.setCoins();
+    _coinsRepo.setCoins([]);
   }
 
   connectToTicker(coins: Coin[], cb: Listener): void {

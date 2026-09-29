@@ -23,16 +23,21 @@ class AxiosService {
       (config) => {
         return config;
       },
-      (error) => Promise.reject(error),
+      (error: unknown) =>
+        Promise.reject(
+          error instanceof Error ? error : new Error(String(error)),
+        ),
     );
   }
 
   private initializeResponseInterceptor() {
     this.client.interceptors.response.use(
       (response: AxiosResponse) => response,
-      (error) => {
+      (error: unknown) => {
         // Handle refresh token / logging / custom errors
-        return Promise.reject(error);
+        return Promise.reject(
+          error instanceof Error ? error : new Error(String(error)),
+        );
       },
     );
   }
