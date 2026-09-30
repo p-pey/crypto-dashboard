@@ -6,7 +6,6 @@ import { BinanceSocketServiceMapper } from "./BinanceSocketService.mapper";
 import type { Listener } from "./BinanceSocketService.types";
 import { CoinsRepository } from "~/repository/coins.repository";
 
-
 @AppSignleton()
 export default class BinanceService {
   private listeners: Listener[] = [];
@@ -18,7 +17,8 @@ export default class BinanceService {
   }
 
   connectToTicker(coins: Coin[], cb: Listener): void {
-    const socketUrl = BinanceSocketServiceMapper.mapCoinsSymbolToGetUrlParam(coins)
+    const socketUrl =
+      BinanceSocketServiceMapper.mapCoinsSymbolToGetUrlParam(coins);
     const url = `wss://stream.binance.com:9443/stream?streams=${socketUrl}`;
     this._websocket.connect(url);
     if (cb) this.subscribe(cb);

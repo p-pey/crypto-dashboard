@@ -8,7 +8,7 @@ import { useState } from "react";
 import SuperJSON from "superjson";
 
 import type { AppRouter } from "~/server/api/root";
-import { createQueryClient } from "./query-client";
+import { attachPersistentCache, createQueryClient } from "./query-client";
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
@@ -17,7 +17,12 @@ const getQueryClient = () => {
     return createQueryClient();
   }
   // Browser: use singleton pattern to keep the same query client
-  clientQueryClientSingleton ??= createQueryClient();
+  if (!clientQueryClientSingleton) {
+    clientQueryClientSingleton = createQueryClient();
+    // Serves the first paint from IndexedDB, then revalidates in the
+    // background, so a reload shows real prices instead of skeletons.
+    attachPersistentCache(clientQueryClientSingleton);
+  }
 
   return clientQueryClientSingleton;
 };

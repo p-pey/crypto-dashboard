@@ -1,16 +1,19 @@
 import type { PropsWithChildren } from "react";
 import { cookies } from "next/headers";
 
+import AlertProvider from "~/providers/AlertProvider";
 import AppFooter from "./footer";
 import AppHeader from "./header";
 import Sidebar from "./sidebar";
-import { DEFAULT_APP_THEME } from "~/constants/constants";
+import { DEFAULT_APP_THEME, isAppTheme } from "~/constants/constants";
 import type { AppTheme } from "~/types/types";
 
 export default async function AppShell({ children }: PropsWithChildren) {
   const cookie = await cookies();
-  const theme =
-    (cookie.get("theme")?.value as AppTheme | null) ?? DEFAULT_APP_THEME;
+  const cookieTheme = cookie.get("theme")?.value;
+  const theme: AppTheme = isAppTheme(cookieTheme)
+    ? cookieTheme
+    : DEFAULT_APP_THEME;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">
@@ -26,11 +29,13 @@ export default async function AppShell({ children }: PropsWithChildren) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3.5 sm:gap-4">
-          <AppHeader theme={theme} />
-          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pe-0.5 pb-1">
-            {children}
-          </main>
-          <AppFooter />
+          <AlertProvider>
+            <AppHeader theme={theme} />
+            <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pe-0.5 pb-1">
+              {children}
+            </main>
+            <AppFooter />
+          </AlertProvider>
         </div>
       </div>
     </div>

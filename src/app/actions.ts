@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { Themes } from "~/constants/constants";
+import { DEFAULT_APP_THEME, isAppTheme } from "~/constants/constants";
 import { DEFAULT_LOCALE, isLocale } from "~/i18n/config";
 import type { AppTheme } from "~/types/types";
 
@@ -20,7 +20,8 @@ export async function setThemeCookie(theme: AppTheme) {
 
 export async function getThemeCookie(): Promise<AppTheme> {
   const store = await cookies();
-  return (store.get(THEME_COOKIE)?.value as AppTheme | null) ?? Themes.light;
+  const value = store.get(THEME_COOKIE)?.value;
+  return isAppTheme(value) ? value : DEFAULT_APP_THEME;
 }
 
 /**

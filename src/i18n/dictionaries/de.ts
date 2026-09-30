@@ -40,6 +40,7 @@ const de: Dictionary = {
     switchTo: "Zu %s-Design wechseln",
     light: "Hell",
     dark: "Dunkel",
+    glass: "Glas",
     systemsNominal: "Systeme betriebsbereit",
     feedActive: "WebSocket-Feed aktiv",
     all: "Alle",
@@ -79,6 +80,7 @@ const de: Dictionary = {
     spotMarkets: "Spot-Märkte",
     spotMarketsHint: "Live-Binance-Ticker · aktualisiert sich fortlaufend",
     syncing: "Synchronisiert",
+    refreshing: "wird aktualisiert",
     pairs: "%s Paare",
     waitingFirstTick: "Warte auf den ersten Tick…",
     columns: {
@@ -176,6 +178,7 @@ const de: Dictionary = {
     title: "Iranische Preistafel",
     description:
       "Alle iranischen Börsen und Kursquellen auf einem Board: Orderbücher von Nobitex, Wallex, Bitpin und Tabdeal, live über deren eigene WebSockets, Wallex' vollständige Toman-Marktliste sowie die Gold-, Münz-, Währungs- und Kryptokurse von nerkh.io. Nach Quelle filtern, nach Kategorie gruppieren und zwischen Rial und Toman wechseln.",
+    lastUpdate: "letzte Aktualisierung",
     websocketLive: "WebSocket live",
     restOnly: "nur REST-Aktualisierung",
     errorTitle: "REST-Ausgangswert der Börsen konnte nicht geladen werden",
@@ -192,6 +195,10 @@ const de: Dictionary = {
       "Kein Instrument passt zu den aktuellen Quellen- und Kategoriefiltern.",
     unitHint:
       "Alle Preise werden in %s angezeigt. Jede Quelle rechnet in ihrer eigenen Einheit und wird vor der Anzeige vereinheitlicht.",
+    poll: {
+      cadence: "alle 60 s abgerufen",
+      hint: "Nobitex, Wallex, Bitpin und Tabdeal senden ihre Orderbücher über ein WebSocket, ihre Preise sind also bereits aktuell. nerkh.io und die Wallex-Marktliste haben keinen Stream und werden alle 60 Sekunden abgerufen; nur diese Quellen werden über die Aktualisieren-Schaltfläche neu abgerufen.",
+    },
     sourceTag: {
       aggregator: "Kurs",
     },
@@ -205,6 +212,14 @@ const de: Dictionary = {
     filter: {
       allSources: "Alle Quellen",
       allCategories: "Alle Kategorien",
+      search: "Instrument suchen",
+    },
+    compare: {
+      view: "Quellen vergleichen",
+      board: "Alle Märkte",
+      gap: "Spanne",
+      empty:
+        "Unter den aktuellen Filtern wird kein Instrument von mehr als einer Quelle notiert.",
     },
     assets: {
       usdt: "Tether",
@@ -225,6 +240,11 @@ const de: Dictionary = {
       stream: "Stream",
       lastUpdate: "letzte Aktualisierung %s",
       noUpdateYet: "noch keine Aktualisierung",
+      hourChange: "1 Std.",
+      hourChangeHint:
+        "Veränderung der letzten Stunde, gemessen bei jeder Aktualisierung dieser Sitzung.",
+      hourTrend: "1-Std.-Trend",
+      hourTrendHint: "Letzte Stunde, bei jeder Aktualisierung abgetastet",
     },
     stats: {
       instruments: "Instrumente",
@@ -474,6 +494,41 @@ const de: Dictionary = {
       liveTag: "live",
       empty:
         "Im letzten Aktualisierungsfenster wurden keine Schlagzeilen abgerufen.",
+    },
+  },
+
+  cache: {
+    restored: "aus dem Cache",
+    title: "Offline-Cache",
+    description:
+      "Marktdaten werden bis zu einem Tag in diesem Browser gehalten und beim Neuladen vor der Netzwerkantwort wiederhergestellt.",
+    age: "Alter der Daten",
+    entries: "%s zwischengespeicherte Abfragen",
+    version: "Schemaversion %s",
+    limit: "Einträge, die älter als ein Tag sind, werden beim Start verworfen.",
+    clear: "Cache leeren",
+    cleared: "Cache geleert",
+  },
+
+  alerts: {
+    title: "Preisalarme",
+    enable: "Bei großen Bewegungen alarmieren",
+    sound: "Ton",
+    threshold: "Bewegungs-Schwelle",
+    window: "Messfenster",
+    volume: "Lautstärke",
+    notifications: "Browser-Benachrichtigung",
+    allow: "Erlauben",
+    audioHint:
+      "Klicken Sie irgendwo, um Ton zu erlauben. Browser blockieren Audio bis zur ersten Interaktion.",
+    history: "In dieser Sitzung ausgelöst",
+    historyEmpty: "Noch keine Alarme.",
+    sounds: {
+      chime: "Glocke",
+      blip: "Piep",
+      coinDrop: "Münzklang",
+      siren: "Sirene",
+      knock: "Klopfen",
     },
   },
 

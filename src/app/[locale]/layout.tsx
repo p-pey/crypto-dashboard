@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import "reflect-metadata";
 
 import AppShell from "~/components/layout/layout";
-import { DEFAULT_APP_THEME } from "~/constants/constants";
+import { DEFAULT_APP_THEME, isAppTheme } from "~/constants/constants";
 import { isLocale, LOCALES, LOCALE_META, type Locale } from "~/i18n/config";
 import { getDictionary } from "~/i18n/dictionaries";
 import I18nProvider from "~/i18n/I18nProvider";
@@ -88,8 +88,10 @@ export default async function RootAppLayout({
     getDictionary(locale),
   ]);
 
-  const theme =
-    (cookie.get("theme")?.value as AppTheme | null) ?? DEFAULT_APP_THEME;
+  const cookieTheme = cookie.get("theme")?.value;
+  const theme: AppTheme = isAppTheme(cookieTheme)
+    ? cookieTheme
+    : DEFAULT_APP_THEME;
   const meta = LOCALE_META[locale];
 
   return (
@@ -98,9 +100,14 @@ export default async function RootAppLayout({
       dir={meta.dir}
       suppressHydrationWarning
       className={`${geist.variable} ${geistMono.variable} ${vazirmatn.variable} ${
+        // Tailwind's `dark:` variant is keyed off this class, so it stays a
+        // class. The themes themselves are attributes: `.glass` is already a
+        // component class in the stylesheet and must not be reused here.
         theme === "dark" ? "dark" : ""
       }`}
-      style={{ colorScheme: theme }}
+      data-theme={theme}
+      // `color-scheme` only understands light/dark, so glass reports dark.
+      style={{ colorScheme: theme === "light" ? "light" : "dark" }}
     >
       <body className="antialiased">
         <AntdRegistry>

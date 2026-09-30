@@ -85,6 +85,43 @@ export const COLORS: Record<keyof typeof Themes, ThemePalette> = {
     upSoft: "#0f2a24",
     downSoft: "#2d1420",
   },
+  /**
+   * The glass palette, mirroring the `.glass` token block in `globals.css`.
+   *
+   * The surface values are the CSS alpha tints composited over the brightest
+   * part of the aurora, so an antd popover sitting next to a frosted panel
+   * matches it instead of appearing as a pale grey box.
+   *
+   * They are the *resolved* colours rather than the alpha ones the CSS uses:
+   * antd composites tokens itself and cannot blend against a backdrop it does
+   * not know about, so a translucent value would render as a washed-out grey
+   * box. Picking the equivalent colour over the darkest part of the aurora keeps
+   * antd's own components in step with the CSS-rendered ones.
+   */
+  glass: {
+    base: "#0e1020",
+    deep: "#0a0b16",
+    surface: "#1f1e49",
+    surface2: "#262359",
+    surface3: "#262651",
+    border: "rgb(255 255 255 / 0.15)",
+    borderStrong: "rgb(255 255 255 / 0.24)",
+    text: "#f6f8ff",
+    text2: "#ccd3e6",
+    text3: "#a8b1cc",
+    brand: "#9c8dff",
+    brand2: "#b7abff",
+    brandSoft: "rgb(156 141 255 / 0.24)",
+    onBrand: "#ffffff",
+    cyan: "#3fe3f4",
+    mint: "#4ae8ba",
+    amber: "#ffc266",
+    rose: "#ff7d99",
+    up: "#4ae8ba",
+    down: "#ff7d99",
+    upSoft: "rgb(74 232 186 / 0.18)",
+    downSoft: "rgb(255 125 153 / 0.18)",
+  },
 };
 
 /**
@@ -93,7 +130,8 @@ export const COLORS: Record<keyof typeof Themes, ThemePalette> = {
  */
 export function buildAntdTheme(mode: keyof typeof Themes) {
   const c = COLORS[mode];
-  const isDark = mode === "dark";
+  // Glass is a dark scheme; it only changes how surfaces are painted.
+  const isDark = mode !== "light";
 
   return {
     cssVar: { key: "obsidian" },

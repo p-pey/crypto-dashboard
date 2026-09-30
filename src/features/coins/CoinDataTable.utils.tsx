@@ -3,7 +3,9 @@
 import type { ColumnsType } from "antd/es/table";
 import { Avatar, Button, Tag, Tooltip } from "antd";
 import { useMemo } from "react";
+import FlashValue from "~/components/shared/FlashValue";
 import Sparkline from "~/features/shared/Sparkline";
+import UpdatedStamp from "~/components/shared/UpdatedStamp";
 import { useI18n } from "~/i18n/I18nProvider";
 import type { PriceChange } from "~/services/binance/BinanceSocketService.types";
 import type { StatusVerdict } from "~/services/statuses/statuses.types";
@@ -17,7 +19,9 @@ export const VERDICT_COLOR: Record<StatusVerdict, string> = {
   avoid: "#d63031",
 };
 
-export function useCoinColumns(): ColumnsType<PriceChange> {
+export function useCoinColumns(
+  updatedAt: number | null,
+): ColumnsType<PriceChange> {
   const { t } = useI18n();
 
   return useMemo<ColumnsType<PriceChange>>(
@@ -84,7 +88,21 @@ export function useCoinColumns(): ColumnsType<PriceChange> {
           );
         },
       },
-      { title: t("markets.columns.price"), dataIndex: "price", key: "price" },
+      {
+        title: t("markets.columns.price"),
+        dataIndex: "price",
+        key: "price",
+        // The Binance socket pushes roughly a tick a second, so this column is
+        // where a change is most visible: green when the price rose, red when
+        // it fell.
+        render: (price: string) => (
+          <span className="num text-[13px] font-semibold tabular-nums">
+            <FlashValue value={Number(price)} className="inline-block">
+              {price}
+            </FlashValue>
+          </span>
+        ),
+      },
       {
         title: t("markets.columns.trend"),
         dataIndex: "spark",
@@ -106,7 +124,20 @@ export function useCoinColumns(): ColumnsType<PriceChange> {
         dataIndex: "change",
         key: "change",
       },
+      {
+        // The stamp lives in the header rather than on every row, because a
+        // timestamp is a property of the snapshot, not of a coin.
+        title: () => (
+          <span className="text-fg-3 text-[10px] font-semibold tracking-[0.1em] uppercase">
+            {t("common.updated")}
+          </span>
+        ),
+        key: "updatedAt",
+        width: 150,
+        align: "right",
+        render: () => <UpdatedStamp at={updatedAt} label="" />,
+      },
     ],
-    [t],
+    [t, updatedAt],
   );
 }

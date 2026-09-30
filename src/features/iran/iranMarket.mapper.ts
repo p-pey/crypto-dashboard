@@ -19,6 +19,16 @@ import {
 } from "~/services/nerkh/nerkh.types";
 
 /**
+ * The only stablecoin the board carries.
+ *
+ * USDC, DAI and the rest add a second Tether peg to a table that is already
+ * long, and none of them are what an Iranian trader is tracking. The deep
+ * feed and nerkh.io both follow USDT, so keeping only it means every
+ * stablecoin row in the board is a real USDT market from a real source.
+ */
+export const STABLECOIN_BASES = new Set(["USDT"]);
+
+/**
  * Everything the price board needs, folded into one flat row list.
  *
  * Three feeds with three different shapes are normalised here rather than in
@@ -122,6 +132,7 @@ function tickerToRow(ticker: IrTicker): MarketRow {
     key: `exchange:${ticker.exchange}:${ticker.asset}`,
     source: ticker.exchange,
     assetId: ticker.asset,
+    baseAsset: ticker.asset.toUpperCase(),
     category: categoriseBaseAsset(ticker.asset.toUpperCase()),
     labelKey: ASSET_LABEL_KEYS[ticker.asset],
     upstreamName: null,
@@ -173,6 +184,7 @@ function boardToRow(
     key: `board:${board.source}:${row.symbol}`,
     source: row.source,
     assetId: row.assetId,
+    baseAsset: row.baseAsset,
     category: row.category,
     labelKey: row.labelKey,
     upstreamName: upstream,
@@ -205,6 +217,7 @@ function nerkhToRow(quote: NerkhQuote, fetchedAt: number): MarketRow {
     key: `nerkh:${quote.key}`,
     source: "nerkh",
     assetId: nerkhAssetId(quote),
+    baseAsset: quote.key,
     category: nerkhCategory(quote),
     labelKey: NERKH_LABEL_KEYS[quote.key] ?? "irPrice.assets.other",
     upstreamName: null,
@@ -262,7 +275,19 @@ export function buildMarketBoard(input: MarketBoardInput): MarketRow[] {
     }
   }
 
-  return sortBoard(rows);
+  return sortBoard(rows.filter(isIncluded));
+}
+
+/**
+ * Drops stablecoins other than Tether. The board is grouped by category, so
+ * leaving a stray USDC row in would put it beside the USDT rows it duplicates.
+ */
+function isIncluded(row: MarketRow): boolean {
+  if (row.category !== "stablecoin") return true;
+  // Matched on the base asset, not the market symbol: `USDCUSDT` is a USDC
+  // market that happens to end in `USDT`, and a substring test would let it
+  // through as if it were Tether.
+  return STABLECOIN_BASES.has(row.baseAsset);
 }
 
 /** Sources in display order, so the deep books sit above the wide board. */

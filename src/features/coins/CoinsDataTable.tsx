@@ -7,19 +7,24 @@ import { AppContainer } from "~/lib/container";
 import BinanceService from "~/services/binance/BinanceSocketService";
 import { coinPriceHistory } from "~/services/binance/priceHistory";
 import type { PriceChange } from "~/services/binance/BinanceSocketService.types";
+import UpdatedStamp from "~/components/shared/UpdatedStamp";
+import { useAlerts } from "~/providers/AlertProvider";
+import { useI18n } from "~/i18n/I18nProvider";
 import { api } from "~/trpc/react";
 import { useCoinColumns } from "./CoinDataTable.utils";
 
 const BinanceWebSocketInstance = AppContainer.resolve(BinanceService);
 
 export default function CoinsDataTable() {
+  const { t } = useI18n();
+  const { watch } = useAlerts();
   const [LData, setLData] = useState<PriceChange[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
-  const columns = useCoinColumns();
-  const { isLoading, data } = api.overview.getPrices.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
+  const { isLoading, data, dataUpdatedAt, isFetching } =
+    api.overview.getPrices.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    });
 
   useEffect(() => {
     if (!data?.length) return;
@@ -36,7 +41,12 @@ export default function CoinsDataTable() {
     BinanceWebSocketInstance.connectToTicker(data, (rows) => {
       for (const row of rows) {
         const price = Number(row.price);
-        if (Number.isFinite(price)) coinPriceHistory.push(row.symbol, price);
+        if (Number.isFinite(price)) {
+          coinPriceHistory.push(row.symbol, price);
+          // Every live tick is offered to the pump/dump detector, which decides
+          // on its own whether the move was large enough to be worth a noise.
+          watch(row.symbol, row.symbol, price);
+        }
         // The mapper hands back stable row objects, so attaching the current
         // window in place keeps the array reference stable for memoised cells
         // and avoids rebuilding 100 objects on every tick.
@@ -44,7 +54,9 @@ export default function CoinsDataTable() {
       }
       setLData(rows);
     });
-  }, [data, isLoading]);
+  }, [data, isLoading, watch]);
+
+  const columns = useCoinColumns(dataUpdatedAt || null);
 
   const toggleExpand = useCallback((key: string) => {
     setExpandedKeys((current) =>
@@ -92,6 +104,15 @@ export default function CoinsDataTable() {
   return (
     <Table
       loading={isLoading}
+      // A live websocket keeps the rows moving between REST refreshes, so the
+      // fetch time is stamped separately from the last tick.
+      title={() => (
+        <UpdatedStamp
+          at={dataUpdatedAt || null}
+          label={isFetching ? t("markets.refreshing") : undefined}
+          refreshing={isFetching}
+        />
+      )}
       dataSource={rows}
       columns={columns}
       expandable={{

@@ -1,12 +1,25 @@
 "use client";
 
-import { motion } from "motion/react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { navHref } from "~/constants/navigation";
 import { formatSignedPercent } from "~/i18n/format";
 import { useI18n } from "~/i18n/I18nProvider";
 import { api } from "~/trpc/react";
 import type { Coin } from "~/types/types";
+
+/**
+ * Pixels the strip travels per second.
+ *
+ * The animation distance is a percentage of the content, so a fixed duration
+ * would make the strip visibly faster or slower depending on how many coins
+ * are listed. Measuring the content and deriving the duration from a constant
+ * speed keeps the crawl steady, and slow, at any list length.
+ */
+const SPEED_PX_PER_SECOND = 22;
+
+/** Upper bound on rendered copies, so a huge list cannot bloat the DOM. */
+const MAX_COPIES = 6;
 
 export default function PriceTicker() {
   const { locale, t } = useI18n();
@@ -18,10 +31,39 @@ export default function PriceTicker() {
   const items: Coin[] = data ?? [];
   const home = navHref(locale, "/");
 
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [durationMs, setDurationMs] = useState(120_000);
+
+  /**
+   * How many copies are needed to cover the viewport twice over, so the loop
+   * point is never visible.
+   */
+  const copies = useMemoCopies(trackRef, items.length);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || items.length === 0) return;
+
+    const measure = () => {
+      // One copy's width, not the whole track: the loop is translate(-50%) of
+      // a two-copy track, so it advances by exactly one copy width.
+      const oneCopy = track.firstElementChild;
+      if (!oneCopy) return;
+      const width = oneCopy.getBoundingClientRect().width;
+      if (width <= 0) return;
+      setDurationMs(Math.max(20_000, (width / SPEED_PX_PER_SECOND) * 1000));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [items.length, copies]);
+
   return (
     <div className="glass relative flex h-[42px] items-center overflow-hidden rounded-[16px]">
       <div className="border-line/70 from-brand/20 z-10 flex h-full shrink-0 items-center gap-2 border-e bg-gradient-to-r to-transparent px-3.5">
-        <span className="bg-brand-2 size-1.5 rounded-full shadow-[0_0_10px_var(--brand-2)]" />
+        <span className="bg-brand-2 size-1.5 animate-pulse rounded-full shadow-[0_0_10px_var(--brand-2)]" />
         <span className="text-fg-2 text-[10px] font-bold tracking-[0.14em] uppercase">
           {t("footer.change24h")}
         </span>
@@ -38,12 +80,16 @@ export default function PriceTicker() {
             ))}
           </div>
         ) : (
-          <div className="animate-marquee flex w-max group-hover:[animation-play-state:paused]">
-            {[0, 1].map((dup) => (
+          <div
+            ref={trackRef}
+            className="animate-ticker flex w-max group-hover:[animation-play-state:paused]"
+            style={{ animationDuration: `${durationMs}ms` }}
+          >
+            {Array.from({ length: copies }, (_, dup) => (
               <div
                 key={dup}
                 className="flex shrink-0 items-center"
-                aria-hidden={dup === 1}
+                aria-hidden={dup > 0}
               >
                 {items.map((coin) => {
                   const up = coin.price_change_percentage_24h >= 0;
@@ -87,17 +133,41 @@ export default function PriceTicker() {
         <div className="from-surface pointer-events-none absolute inset-y-0 start-0 w-10 bg-gradient-to-r to-transparent" />
         <div className="from-surface pointer-events-none absolute inset-y-0 end-0 w-10 bg-gradient-to-l to-transparent" />
       </div>
-
-      <motion.div
-        className="border-line/70 z-10 hidden h-full shrink-0 items-center border-s px-3.5 md:flex"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <span className="text-fg-3 text-[10px] font-medium tracking-wider uppercase">
-          {t("footer.terminal")}
-        </span>
-      </motion.div>
     </div>
   );
+}
+
+/**
+ * Copies needed to exceed the container width. Measured after layout, and kept
+ * at two until then, which is the minimum for a seamless loop.
+ */
+function useMemoCopies(
+  trackRef: React.RefObject<HTMLDivElement | null>,
+  itemCount: number,
+): number {
+  const [copies, setCopies] = useState(2);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || itemCount === 0) return;
+
+    const measure = () => {
+      const oneCopy = track.firstElementChild;
+      if (!oneCopy) return;
+      const copyWidth = oneCopy.getBoundingClientRect().width;
+      const visible = track.parentElement?.getBoundingClientRect().width ?? 0;
+      if (copyWidth <= 0 || visible <= 0) return;
+      // Two full viewports of content means the seam is always off screen.
+      setCopies(
+        Math.min(MAX_COPIES, Math.ceil((visible * 2) / copyWidth) || 2),
+      );
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [itemCount, trackRef]);
+
+  return copies;
 }

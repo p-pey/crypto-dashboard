@@ -14,12 +14,22 @@ export type MarketSourceId = IrExchangeId | "nerkh";
 /** How a source publishes its prices. */
 export type MarketSourceKind = "exchange" | "aggregator";
 
+/**
+ * Whether a source pushes prices over a websocket or is crawled on a timer.
+ *
+ * This decides two things: which rows the refresh button is allowed to touch,
+ * and how often the crawler runs. A socket source is already current, so
+ * re-requesting it only costs a round trip.
+ */
+export type MarketSourceTransport = "socket" | "poll";
+
 export type MarketSourceMeta = {
   id: MarketSourceId;
   label: string;
   color: string;
   website: string;
   kind: MarketSourceKind;
+  transport: MarketSourceTransport;
   /**
    * Sources that expose a full market list get a `board` row per market;
    * sources that only publish a handful of tracked assets get deep rows with
@@ -35,6 +45,7 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     color: "#2f7de1",
     website: "https://nobitex.ir",
     kind: "exchange",
+    transport: "socket",
     wide: false,
   },
   {
@@ -43,6 +54,9 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     color: "#7b61ff",
     website: "https://wallex.ir",
     kind: "exchange",
+    transport: "socket",
+    // Wallex streams its tracked order books over socket.io, but the wide
+    // market list behind its board rows is a plain REST crawl.
     wide: true,
   },
   {
@@ -51,6 +65,7 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     color: "#00b894",
     website: "https://bitpin.ir",
     kind: "exchange",
+    transport: "socket",
     wide: false,
   },
   {
@@ -59,6 +74,7 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     color: "#f39c12",
     website: "https://tabdeal.org",
     kind: "exchange",
+    transport: "socket",
     wide: false,
   },
   {
@@ -67,9 +83,21 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     color: "#0ea5e9",
     website: "https://nerkh.io",
     kind: "aggregator",
+    transport: "poll",
+    // No websocket: nerkh.io is crawled on a timer.
     wide: true,
   },
 ];
+
+/** Sources with no websocket, crawled on the poll interval. */
+export const POLLED_SOURCES: MarketSourceMeta[] = MARKET_SOURCES.filter(
+  (source) => source.transport === "poll",
+);
+
+/** Sources that stream over a websocket and are never re-requested by hand. */
+export const SOCKET_SOURCES: MarketSourceMeta[] = MARKET_SOURCES.filter(
+  (source) => source.transport === "socket",
+);
 
 const SOURCE_INDEX = new Map<MarketSourceId, MarketSourceMeta>(
   MARKET_SOURCES.map((source) => [source.id, source]),
@@ -83,6 +111,7 @@ export function marketSource(id: MarketSourceId): MarketSourceMeta {
       color: "var(--text-3)",
       website: "https://nerkh.io",
       kind: "aggregator",
+      transport: "poll",
       wide: false,
     }
   );

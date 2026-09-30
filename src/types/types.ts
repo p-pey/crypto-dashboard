@@ -21,9 +21,10 @@ export type YahooFinanceChartResponse = {
       };
     }>;
   };
-};export type Coin = {
+};
+export type Coin = {
   // custom value
-  order: number,
+  order: number;
   price: string;
   ath: number;
   ath_change_percentage: number;

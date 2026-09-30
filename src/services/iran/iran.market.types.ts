@@ -15,6 +15,8 @@ export type MarketRow = {
   source: MarketSourceId;
   /** Canonical instrument id, unique within a source. */
   assetId: string;
+  /** The base instrument being quoted: `USDT`, `XAUT`, `BTC`, `USD`. */
+  baseAsset: string;
   category: MarketCategory;
   /** Dictionary key used when the source does not supply its own name. */
   labelKey: TranslationKey;
@@ -48,6 +50,8 @@ export type MarketRow = {
 export type ExchangeBoardRow = {
   source: MarketSourceId;
   assetId: string;
+  /** The base instrument being quoted, e.g. `USDC` for `USDCTMN`. */
+  baseAsset: string;
   category: MarketCategory;
   labelKey: TranslationKey;
   upstreamName: { fa: string | null; en: string | null };

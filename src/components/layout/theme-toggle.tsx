@@ -1,16 +1,53 @@
 import { setThemeCookie } from "~/app/actions";
-import { Themes } from "~/constants/constants";
+import { Themes, THEME_ORDER } from "~/constants/constants";
 import { useI18n } from "~/i18n/I18nProvider";
 import type { AppTheme } from "~/types/types";
 
 /**
- * Client theme switcher. The active theme is stored in a cookie that the root
- * layout reads server-side, so switching needs a server round trip plus a
- * `router.refresh()` to re-render with the new antd algorithm.
+ * One glyph per theme, drawn in the accent colour that theme is known by.
  *
- * The `.dark` class on <html> is flipped optimistically so the CSS custom
- * properties (aurora, panels, Tailwind `dark:` variants) switch instantly
- * without waiting for the RSC payload.
+ * Keying the icon on the target rather than stacking three spans keeps the
+ * markup to a single child, and remounting it on every change is what drives
+ * the little entrance animation.
+ */
+const ICONS: Record<AppTheme, { path: string; color: string }> = {
+  light: {
+    path: "M12 4V2M12 22v-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4",
+    color: "text-amber",
+  },
+  dark: {
+    path: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z",
+    color: "text-brand-2",
+  },
+  glass: {
+    // A droplet over a curved baseline: liquid glass without pretending to be
+    // a literal material.
+    path: "M12 3c3.2 3.4 5.5 6.3 5.5 9.2A5.5 5.5 0 0 1 6.5 12.2C6.5 9.3 8.8 6.4 12 3ZM3.5 20.5c2.6-1.3 5.2-1.3 8.5 0s5.9 1.3 8.5 0",
+    color: "text-cyan",
+  },
+};
+
+/** The themes a visitor cycles through, in order. */
+function nextTheme(theme: AppTheme): AppTheme {
+  const index = THEME_ORDER.indexOf(theme);
+  // An unrecognised cookie value should still land on a real theme.
+  if (index === -1) return Themes.light;
+  return THEME_ORDER[(index + 1) % THEME_ORDER.length] ?? Themes.light;
+}
+
+/**
+ * Client theme switcher. The active theme is stored in a cookie that the root
+ * layout reads server-side, so switching needs a server round trip plus a reload
+ * to re-render with the new antd algorithm.
+ *
+ * The class on <html> is flipped optimistically so the CSS custom properties
+ * (aurora, panels, Tailwind `dark:` variants) switch instantly, without waiting
+ * for the RSC payload.
+ *
+ * This cycles light → dark → glass rather than toggling between two, because
+ * three themes are no longer a pair. The glyph shown is always the theme you
+ * would land on, and its position in the cycle is what the loading spinner
+ * beside it reflects.
  */
 export default function ThemeToggle({
   theme,
@@ -20,13 +57,22 @@ export default function ThemeToggle({
   showLabel?: boolean;
 }) {
   const { t } = useI18n();
-  const next = theme === Themes.dark ? Themes.light : Themes.dark;
-  const nextLabel = next === Themes.dark ? t("common.dark") : t("common.light");
+  const next = nextTheme(theme);
+  const icon = ICONS[next];
+
+  const nextLabel =
+    next === Themes.dark
+      ? t("common.dark")
+      : next === Themes.glass
+        ? t("common.glass")
+        : t("common.light");
   const label = t("common.switchTo", nextLabel);
 
   async function toggle() {
     document.documentElement.classList.toggle("dark", next === Themes.dark);
-    document.documentElement.style.colorScheme = next;
+    document.documentElement.setAttribute("data-theme", next);
+    document.documentElement.style.colorScheme =
+      next === Themes.light ? "light" : "dark";
     document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
     await setThemeCookie(next);
     window.location.reload();
@@ -43,44 +89,27 @@ export default function ThemeToggle({
       <span className="via-brand/15 pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent to-transparent transition-transform duration-700 group-hover:translate-x-full" />
 
       <span className="relative grid size-6 place-items-center">
-        <span
-          className={`absolute transition-all duration-500 ${
-            theme === Themes.light
-              ? "scale-100 rotate-0 opacity-100"
-              : "scale-0 rotate-90 opacity-0"
-          }`}
+        {/* Re-keyed on the target so the next glyph animates in rather than the
+            previous one animating out. */}
+        <svg
+          key={next}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+          className={`${icon.color} size-[18px] motion-safe:animate-[fade-up_0.45s_var(--ease-out-expo)_both]`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            className="text-amber size-[18px]"
-          >
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-          </svg>
-        </span>
-        <span
-          className={`absolute transition-all duration-500 ${
-            theme === Themes.dark
-              ? "scale-100 rotate-0 opacity-100"
-              : "scale-0 -rotate-90 opacity-0"
-          }`}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-brand-2 size-[18px]"
-          >
-            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
-          </svg>
-        </span>
+          {next === Themes.light && (
+            <>
+              <circle cx="12" cy="12" r="4" />
+              <path d={icon.path} />
+            </>
+          )}
+          {next !== Themes.light && <path d={icon.path} />}
+        </svg>
       </span>
 
       {showLabel && (

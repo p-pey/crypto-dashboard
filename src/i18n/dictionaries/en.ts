@@ -39,6 +39,7 @@ const en = {
     switchTo: "Switch to %s theme",
     light: "Light",
     dark: "Dark",
+    glass: "Glass",
     systemsNominal: "Systems nominal",
     feedActive: "Websocket feed active",
     all: "All",
@@ -78,6 +79,7 @@ const en = {
     spotMarkets: "Spot markets",
     spotMarketsHint: "Live Binance ticker · updates in place",
     syncing: "Syncing",
+    refreshing: "refreshing",
     pairs: "%s pairs",
     waitingFirstTick: "Waiting for the first tick…",
     columns: {
@@ -170,6 +172,7 @@ const en = {
     title: "Iranian price board",
     description:
       "Every Iranian exchange and rate source on one board: order books from Nobitex, Wallex, Bitpin and Tabdeal kept live over their own websockets, Wallex's full Toman market list, and the nerkh.io gold, coin, currency and crypto rates. Filter by source, group by category, and switch between Rial and Toman.",
+    lastUpdate: "last update",
     websocketLive: "websocket live",
     restOnly: "rest refresh only",
     errorTitle: "Could not load the exchange REST snapshot",
@@ -185,6 +188,10 @@ const en = {
     noMatch: "No instrument matches the current source and category filters.",
     unitHint:
       "All prices are shown in %s. Each source quotes in its own unit and is normalised before display.",
+    poll: {
+      cadence: "crawled every 60s",
+      hint: "Nobitex, Wallex, Bitpin and Tabdeal push their order books over a websocket, so their prices are already current. nerkh.io and the Wallex market list have no stream, so they are crawled every 60 seconds, and they are the only sources the refresh button re-crawls.",
+    },
     sourceTag: {
       aggregator: "rate",
     },
@@ -198,6 +205,14 @@ const en = {
     filter: {
       allSources: "All sources",
       allCategories: "All categories",
+      search: "Search instrument",
+    },
+    compare: {
+      view: "Compare providers",
+      board: "All markets",
+      gap: "Gap",
+      empty:
+        "No instrument is quoted by more than one source under the current filters.",
     },
     assets: {
       usdt: "Tether",
@@ -218,6 +233,11 @@ const en = {
       stream: "stream",
       lastUpdate: "last update %s",
       noUpdateYet: "no update yet",
+      hourChange: "1h",
+      hourChangeHint:
+        "Move over the last hour, measured from every refresh this session.",
+      hourTrend: "1h trend",
+      hourTrendHint: "Last one hour, sampled on every refresh",
     },
     stats: {
       instruments: "Instruments",
@@ -461,6 +481,41 @@ const en = {
       tierCount: "%s feeds",
       liveTag: "live",
       empty: "No headlines were retrieved in the last refresh window.",
+    },
+  },
+
+  cache: {
+    restored: "from cache",
+    title: "Offline cache",
+    description:
+      "Market snapshots are kept in this browser for up to a day and restored on reload before the network answers.",
+    age: "Age of the data",
+    entries: "%s cached queries",
+    version: "Schema version %s",
+    limit: "Entries older than a day are discarded on start-up.",
+    clear: "Clear cache",
+    cleared: "Cache cleared",
+  },
+
+  alerts: {
+    title: "Price alerts",
+    enable: "Alert on big moves",
+    sound: "Sound",
+    threshold: "Move threshold",
+    window: "Measured over",
+    volume: "Volume",
+    notifications: "Browser notification",
+    allow: "Allow",
+    audioHint:
+      "Click anywhere to allow sound. Browsers block audio until the page is interacted with.",
+    history: "Raised this session",
+    historyEmpty: "No alerts yet.",
+    sounds: {
+      chime: "Chime",
+      blip: "Blip",
+      coinDrop: "Coin drop",
+      siren: "Siren",
+      knock: "Knock",
     },
   },
 

@@ -11,6 +11,7 @@ import {
 import { formatTime } from "~/i18n/format";
 import { useI18n } from "~/i18n/I18nProvider";
 import type { AppTheme } from "~/types/types";
+import AlertBell from "~/components/alerts/AlertBell";
 import LanguageSwitcher from "./language-switcher";
 import ThemeToggle from "./theme-toggle";
 
@@ -82,6 +83,7 @@ export default function AppHeader({ theme }: { theme: AppTheme }) {
       </div>
 
       <ThemeToggle theme={theme} />
+      <AlertBell />
     </header>
   );
 }

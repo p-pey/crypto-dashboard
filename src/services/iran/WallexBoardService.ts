@@ -36,12 +36,11 @@ const MIN_LAST_PRICE = { toman: 1, usdt: 1e-8 } as const;
 /** How the instruments map onto the canonical assets the deep feed tracks. */
 const ASSET_ID_OVERRIDES: Record<string, string> = {
   USDTTMN: "usdt",
-  USDTIRT: "usdt",
   XAUTTMN: "xaut",
-  XAUTIRT: "xaut",
-  GOLD18TMN: "digitalGold",
-  GOLD18IRT: "digitalGold",
 };
+
+/** Quote units Wallex lists against. */
+type QuoteUnit = "TMN" | "USDT";
 
 type WallexMarket = {
   symbol?: string;
@@ -72,9 +71,10 @@ function labelKeyFor(assetId: string): TranslationKey {
 }
 
 /**
- * Wallex quotes everything against Toman. The board is normalised to Rial so
- * it lines up with the order book rows from the other exchanges, which is what
- * `quoteScale` already does for the deep feed.
+ * Wallex lists most markets against Toman and the rest against USDT. The board
+ * is normalised to Rial in both cases, so a BTC/USDT market is comparable with
+ * the BTC/Toman one instead of being displayed at its raw USD price and read
+ * as if it were rials.
  */
 const TOMAN_TO_RIAL = 10;
 
@@ -150,28 +150,50 @@ export function mapWallexMarkets(payload: unknown): ExchangeBoardRow[] {
   if (!symbols || typeof symbols !== "object") return [];
 
   const rows: ExchangeBoardRow[] = [];
+  // The Toman market of an asset is its real rial price, so it is found first
+  // and used to convert the USDT-quoted markets of the same assets.
+  let rateToRial: number | null = null;
+
+  for (const market of Object.values(symbols)) {
+    if (market === null || typeof market !== "object") continue;
+    if (!isTomanQuote(market.quoteAsset ?? "")) continue;
+
+    const last = IrPriceMapper.toNumber(market.stats?.lastPrice);
+    if (last === null || last < MIN_LAST_PRICE.toman) continue;
+    rateToRial = last * TOMAN_TO_RIAL;
+    break;
+  }
 
   for (const [symbol, market] of Object.entries(symbols)) {
     if (market === null || typeof market !== "object") continue;
 
     const base = market.baseAsset ?? symbol;
     const quote = (market.quoteAsset ?? "").trim().toUpperCase();
-    const quotedInToman = isTomanQuote(quote);
-    const scale = quotedInToman ? TOMAN_TO_RIAL : 1;
-    const floor = quotedInToman ? MIN_LAST_PRICE.toman : MIN_LAST_PRICE.usdt;
+    const quoteUnit: QuoteUnit = quote === "USDT" ? "USDT" : "TMN";
+    const quotedInToman = quoteUnit === "TMN";
 
     const bid = IrPriceMapper.toNumber(market.stats?.bidPrice);
     const ask = IrPriceMapper.toNumber(market.stats?.askPrice);
     const last = IrPriceMapper.toNumber(market.stats?.lastPrice);
 
+    const floor = quotedInToman ? MIN_LAST_PRICE.toman : MIN_LAST_PRICE.usdt;
     if (last !== null && last < floor) continue;
     if (bid === null && ask === null && last === null) continue;
 
-    const assetId = ASSET_ID_OVERRIDES[symbol] ?? `${base}TMN`;
+    let scale = quotedInToman ? TOMAN_TO_RIAL : 1;
+    if (!quotedInToman) {
+      // Without a Toman market there is no defensible rial price, so the
+      // market is dropped rather than shown at its raw USD value.
+      if (rateToRial === null) continue;
+      scale = rateToRial;
+    }
+
+    const assetId = ASSET_ID_OVERRIDES[symbol] ?? base.toUpperCase();
 
     rows.push({
       source: "wallex",
       assetId,
+      baseAsset: base.toUpperCase(),
       category: categoriseBaseAsset(base),
       labelKey: labelKeyFor(assetId),
       upstreamName: {
@@ -187,5 +209,21 @@ export function mapWallexMarkets(payload: unknown): ExchangeBoardRow[] {
     });
   }
 
-  return rows;
+  return preferTomanMarkets(rows);
+}
+
+/**
+ * Wallex lists many assets twice, once against Toman and once against USDT.
+ * Both are now in rial, so they are the same instrument priced the same way;
+ * the Toman listing is the direct quote and is the one kept.
+ */
+function preferTomanMarkets(rows: ExchangeBoardRow[]): ExchangeBoardRow[] {
+  const tomanByAsset = new Map<string, ExchangeBoardRow>();
+  for (const row of rows) {
+    if (row.symbol.endsWith("TMN")) tomanByAsset.set(row.assetId, row);
+  }
+
+  return rows.filter(
+    (row) => !row.symbol.endsWith("USDT") || !tomanByAsset.has(row.assetId),
+  );
 }

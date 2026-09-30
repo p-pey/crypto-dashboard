@@ -4,6 +4,7 @@ import { IR_ASSETS, IR_EXCHANGES } from "~/constants/iranExchanges";
 import { AxiosService } from "~/lib/axios";
 import { AppContainer } from "~/lib/container";
 import { IrPriceMapper } from "~/services/iran/iran.mapper";
+import NerkhCrawlerService from "~/services/nerkh/NerkhCrawlerService";
 import WallexBoardService from "~/services/iran/WallexBoardService";
 import type {
   IrAssetConfig,
@@ -16,6 +17,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 const ApiService = AppContainer.resolve(AxiosService);
 const WallexBoard = AppContainer.resolve(WallexBoardService);
+const NerkhCrawler = AppContainer.resolve(NerkhCrawlerService);
 
 const BROWSER_HEADERS = {
   Accept: "application/json, text/plain, */*",
@@ -158,4 +160,27 @@ export const iranRouter = createTRPCRouter({
       const board = await WallexBoard.getBoard({ force: input?.force });
       return { boards: [board] };
     }),
+
+  /**
+   * Re-crawls the providers that have no websocket, bypassing their in-process
+   * caches.
+   *
+   * This is what the refresh button calls. It exists as a mutation rather than
+   * as a forced client refetch because the crawl caches live server-side: a
+   * client refetch can only ask for a query to be re-run, and the server would
+   * still answer from its own cache. Passing `force` as real input is the only
+   * way to make "refresh" mean an actual crawl.
+   *
+   * The exchange order books are deliberately absent: their sockets are already
+   * pushing ticks, so re-requesting them would only cost a round trip to
+   * receive numbers older than the ones already on screen.
+   */
+  refreshPolled: publicProcedure.mutation(async () => {
+    const [board, snapshot] = await Promise.all([
+      WallexBoard.getBoard({ force: true }),
+      NerkhCrawler.getSnapshot({ force: true }),
+    ]);
+
+    return { boards: [board], snapshot, fetchedAt: Date.now() };
+  }),
 });
