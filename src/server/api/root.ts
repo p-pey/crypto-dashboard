@@ -6,7 +6,10 @@ import { iranRouter } from "./iran/iran.router";
 import { candlesRouter } from "./candles/candles.router";
 import { nerkhRouter } from "./nerkh/nerkh.router";
 import { macroRouter } from "./macro/macro.router";
+import { llmRouter } from "./llm/llm.router";
+import { derivativesRouter } from "./derivatives/derivatives.router";
 import { statusesRouter } from "./statuses/statuses.service";
+import { tradingRouter } from "./trading/trading.router";
 
 /**
  * This is the primary router for your server.
@@ -21,7 +24,10 @@ export const appRouter = createTRPCRouter({
   candles: candlesRouter,
   nerkh: nerkhRouter,
   macro: macroRouter,
+  llm: llmRouter,
+  derivatives: derivativesRouter,
   statuses: statusesRouter,
+  trading: tradingRouter,
 });
 
 // export type definition of API

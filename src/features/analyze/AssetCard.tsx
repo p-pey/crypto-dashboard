@@ -3,6 +3,13 @@
 import { Alert, Progress, Tag, Tooltip } from "antd";
 import { motion } from "motion/react";
 import { useMemo } from "react";
+import {
+  Meter,
+  PanelSection,
+  Stat,
+  StatGrid,
+  toneForSign,
+} from "~/components/ui";
 import type { TranslationKey } from "~/i18n/dictionaries/types";
 import { formatNumber, formatPercent, formatRelative } from "~/i18n/format";
 import { useI18n } from "~/i18n/I18nProvider";
@@ -37,30 +44,6 @@ function money(value: number, locale: "fa" | "en" | "de"): string {
   return formatNumber(locale, value, { maximumFractionDigits: 0 });
 }
 
-/** Drift bar: -100..100 rendered as a diverging bar around the midpoint. */
-function DriftBar({ score, available }: { score: number; available: boolean }) {
-  if (!available) {
-    return <div className="bg-surface-3 h-2 w-full rounded-full" aria-hidden />;
-  }
-  const magnitude = Math.min(50, Math.abs(score) / 2);
-  const positive = score >= 0;
-
-  return (
-    <div className="bg-surface-3 relative h-2 w-full overflow-hidden rounded-full">
-      <span className="absolute inset-y-0 left-1/2 w-px bg-[var(--border-strong)]" />
-      <span
-        className="absolute inset-y-0 rounded-full transition-all duration-500"
-        style={{
-          width: `${magnitude}%`,
-          insetInlineStart: positive ? "50%" : undefined,
-          insetInlineEnd: positive ? undefined : "50%",
-          background: positive ? "var(--up)" : "var(--down)",
-        }}
-      />
-    </div>
-  );
-}
-
 function SignalRow({ signal }: { signal: ForecastSignal }) {
   const { t } = useI18n();
 
@@ -92,7 +75,11 @@ function SignalRow({ signal }: { signal: ForecastSignal }) {
             : "—"}
         </span>
       </div>
-      <DriftBar score={signal.score} available={signal.available} />
+      <Meter
+        value={signal.available ? signal.score : null}
+        tone={toneForSign(signal.score, 2)}
+        height={8}
+      />
       {signal.detail && (
         <Tooltip title={signal.detail}>
           <p className="text-fg-3 truncate text-[10.5px]">{signal.detail}</p>
@@ -197,9 +184,15 @@ export function AssetCard({
     forecast.byHorizon.find((entry) => entry.horizon === horizon) ??
     forecast.headline;
 
-  const style = selected
-    ? VERDICT_STYLE[selected.verdict]
-    : VERDICT_STYLE.neutral;
+  // The design system speaks tones, not raw colours.
+  const verdictTone =
+    selected === null || selected === undefined
+      ? undefined
+      : selected.verdict === "bullish"
+        ? ("up" as const)
+        : selected.verdict === "bearish"
+          ? ("down" as const)
+          : undefined;
 
   return (
     <motion.section
@@ -245,36 +238,35 @@ export function AssetCard({
         )}
       </header>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Cell
+      <StatGrid min={150} className="mb-4">
+        <Stat
           label={t("analyze.stats.spot")}
           value={
             forecast.spot === null
               ? "—"
               : `${money(forecast.spot, locale)} ${unit}`
           }
-          accent="var(--text)"
         />
-        <Cell
+        <Stat
           label={t("analyze.stats.target")}
           value={
             selected?.band ? `${money(selected.band.mid, locale)} ${unit}` : "—"
           }
-          accent={style.color}
+          tone={verdictTone}
         />
-        <Cell
+        <Stat
           label={t("analyze.stats.drift")}
           value={selected ? formatPercent(locale, selected.driftPercent) : "—"}
-          accent={style.color}
+          tone={verdictTone}
         />
-        <Cell
+        <Stat
           label={t("analyze.stats.confidence")}
           value={
             selected ? formatPercent(locale, selected.confidence * 100, 0) : "—"
           }
-          accent="var(--brand-2)"
+          tone="brand"
         />
-      </div>
+      </StatGrid>
 
       <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
         {forecast.byHorizon.map((entry) => (
@@ -290,14 +282,11 @@ export function AssetCard({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="border-line flex flex-col gap-3 rounded-[14px] border p-4">
-          <p className="text-fg-3 text-[10.5px] font-semibold tracking-[0.12em] uppercase">
-            {t("analyze.signals.macroPressure")}
-          </p>
+        <PanelSection title={t("analyze.signals.macroPressure")}>
           {forecast.signals.map((signal) => (
             <SignalRow key={signal.key} signal={signal} />
           ))}
-        </div>
+        </PanelSection>
 
         <div className="flex flex-col gap-2.5">
           {forecast.rationale.map((line, index) => (
@@ -336,30 +325,6 @@ export function AssetCard({
         </div>
       </div>
     </motion.section>
-  );
-}
-
-function Cell({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string;
-  accent: string;
-}) {
-  return (
-    <div className="border-line bg-surface-2/60 rounded-[14px] border px-3.5 py-2.5">
-      <p className="text-fg-3 text-[10px] font-semibold tracking-[0.12em] uppercase">
-        {label}
-      </p>
-      <p
-        className="num mt-1 truncate text-[15px] leading-tight font-extrabold tabular-nums"
-        style={{ color: accent }}
-      >
-        {value}
-      </p>
-    </div>
   );
 }
 

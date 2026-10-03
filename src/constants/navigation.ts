@@ -1,10 +1,12 @@
 import {
+  Activity,
   CandlestickChart,
   ChartColumnIncreasing,
   ChartPie,
   Droplets,
   LineChart,
   type LucideIcon,
+  Zap,
 } from "lucide-react";
 
 import { isLocale, withLocale, type Locale } from "~/i18n/config";
@@ -24,6 +26,8 @@ export type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { key: "markets", href: "/", icon: ChartPie },
+  { key: "trade", href: "/trade", icon: Zap },
+  { key: "derivatives", href: "/derivatives", icon: Activity },
   { key: "etfs", href: "/etfs", icon: CandlestickChart },
   { key: "irPrice", href: "/ir-price", icon: Droplets },
   { key: "analyze", href: "/analyze", icon: LineChart },

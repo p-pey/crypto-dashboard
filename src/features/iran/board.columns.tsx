@@ -274,10 +274,25 @@ function TrendCell({
   );
 }
 
-/** Columns of the main board, one row per source per instrument. */
+export type TradeIntent = {
+  instrumentId: string;
+  side: "buy" | "sell";
+  /** The exact price shown in the row, in Rial. */
+  priceInRial: number;
+};
+
+/**
+ * Columns of the main board, one row per source per instrument.
+ *
+ * `onTrade` is optional so the board still renders anywhere it is reused without
+ * trading wired up. It is also null for instruments nobody can trade, which is
+ * how 18k gram gold ends up as a reference row: the venue buttons are simply
+ * not offered, rather than offered and then failing.
+ */
 export function useBoardColumns(
   unit: "rial" | "toman",
   spark: ReadonlyMap<string, number[]>,
+  onTrade: ((intent: TradeIntent) => void) | null,
 ): ListColumn<MarketRow>[] {
   const { t } = useI18n();
   const scale = unitScale(unit);
@@ -349,7 +364,102 @@ export function useBoardColumns(
       render: (row) => <TrendCell values={spark.get(row.key)} scale={scale} />,
       sortValue: () => null,
     },
+    ...(onTrade ? [tradeColumn((row) => onTrade(row), t)] : []),
   ];
+}
+
+/**
+ * Buy and sell, priced off the row's own book.
+ *
+ * Buy is offered off the **ask** and sell off the **bid**, which is what the two
+ * buttons actually cost. Using the mid for both would advertise a buy below the
+ * market and a sell above it, and the difference between mid and the resting
+ * side of the book is the spread the operator is paying.
+ *
+ * The price handed on is in Rial regardless of what the table is displaying; the
+ * ticket owns the conversion to the venue's own quote unit.
+ */
+function tradeColumn(
+  onTrade: (intent: TradeIntent) => void,
+  t: ReturnType<typeof useI18n>["t"],
+): ListColumn<MarketRow> {
+  return {
+    key: "trade",
+    width: "minmax(128px, 0.6fr)",
+    align: "end",
+    title: t("trading.title"),
+    render: (row) => (
+      <TradeCell
+        row={row}
+        onTrade={onTrade}
+        buyLabel={t("trading.action.buy")}
+        sellLabel={t("trading.action.sell")}
+      />
+    ),
+    sortValue: () => null,
+  };
+}
+
+function TradeCell({
+  row,
+  onTrade,
+  buyLabel,
+  sellLabel,
+}: {
+  row: MarketRow;
+  onTrade: (intent: TradeIntent) => void;
+  buyLabel: string;
+  sellLabel: string;
+}) {
+  const { t } = useI18n();
+  // Reference-only instruments have no venue market and therefore no order to
+  // send, so the cell explains that instead of offering a button that fails.
+  if (row.assetId === "gold18k" || row.symbol === null) {
+    return (
+      <Tooltip title={t("trading.ticket.noTradeable")}>
+        <span className="text-fg-3 text-[10px] whitespace-nowrap">
+          {t("trading.ticket.noTradeable")}
+        </span>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-end gap-1.5">
+      <button
+        type="button"
+        disabled={row.ask === null}
+        onClick={() =>
+          onTrade({
+            instrumentId: row.assetId,
+            side: "buy",
+            priceInRial: row.ask ?? 0,
+          })
+        }
+        title={t("trading.ticket.confirmRestingHint")}
+        className="h-7 rounded-full px-2.5 text-[11px] font-bold transition-all duration-300 active:scale-95 disabled:opacity-30"
+        style={{ background: "var(--up)", color: "#04120c" }}
+      >
+        {buyLabel}
+      </button>
+      <button
+        type="button"
+        disabled={row.bid === null}
+        onClick={() =>
+          onTrade({
+            instrumentId: row.assetId,
+            side: "sell",
+            priceInRial: row.bid ?? 0,
+          })
+        }
+        title={t("trading.ticket.confirmRestingHint")}
+        className="h-7 rounded-full px-2.5 text-[11px] font-bold transition-all duration-300 active:scale-95 disabled:opacity-30"
+        style={{ background: "var(--down)", color: "#04120c" }}
+      >
+        {sellLabel}
+      </button>
+    </div>
+  );
 }
 
 /* ------------------------------------------------------------------ *

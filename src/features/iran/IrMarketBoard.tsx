@@ -17,6 +17,7 @@ import {
 import CacheStatus from "~/components/shared/CacheStatus";
 import UpdatedStamp from "~/components/shared/UpdatedStamp";
 import { formatNumber } from "~/i18n/format";
+import { Stat } from "~/components/ui";
 import { useI18n } from "~/i18n/I18nProvider";
 import type {
   ExchangeBoard,
@@ -30,6 +31,7 @@ import {
   useBoardColumns,
   useComparisonColumns,
   type QuoteUnit,
+  type TradeIntent,
 } from "./board.columns";
 import { buildMarketBoard } from "./iranMarket.mapper";
 import { useRollingSeries } from "./useRollingSeries";
@@ -47,6 +49,11 @@ type Props = {
   refreshing: boolean;
   /** Epoch ms the board data last changed. */
   updatedAt: number | null;
+  /**
+   * Opens the order ticket for a row. Null when trading is not available, which
+   * is what hides the venue buttons entirely rather than showing dead ones.
+   */
+  onTrade: ((intent: TradeIntent) => void) | null;
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -70,6 +77,7 @@ export default function IrMarketBoard({
   onRefresh,
   refreshing,
   updatedAt,
+  onTrade,
 }: Props) {
   const { locale, t } = useI18n();
   const [view, setView] = useState<View>("board");
@@ -108,7 +116,7 @@ export default function IrMarketBoard({
     [availableSources],
   );
 
-  const columns = useBoardColumns(unit, spark);
+  const columns = useBoardColumns(unit, spark, onTrade);
   const comparisonColumns = useComparisonColumns(unit, sourceMeta);
 
   const refresh = useCallback(() => {
@@ -182,12 +190,12 @@ export default function IrMarketBoard({
         <Stat
           label={t("irPrice.stats.instruments")}
           value={formatNumber(locale, stats.rows, { maximumFractionDigits: 0 })}
-          accent="var(--brand-2)"
+          tone="brand"
         />
         <Stat
           label={t("irPrice.stats.sources")}
           value={`${stats.sources} / ${MARKET_SOURCES.length}`}
-          accent="var(--cyan)"
+          tone="cyan"
         />
         <Stat
           label={t("irPrice.stats.bestUsdt")}
@@ -203,7 +211,7 @@ export default function IrMarketBoard({
               ? marketSource(stats.bestUsdt.source).label
               : undefined
           }
-          accent="var(--up)"
+          tone="up"
         />
         <Stat
           label={t("irPrice.stats.gold18k")}
@@ -217,7 +225,7 @@ export default function IrMarketBoard({
           hint={
             stats.gold18k ? marketSource(stats.gold18k.source).label : undefined
           }
-          accent="var(--amber)"
+          tone="amber"
         />
       </div>
 
@@ -450,32 +458,5 @@ function RefreshIcon({ spinning }: { spinning: boolean }) {
       <path d="M21 12a9 9 0 1 1-2.64-6.36" />
       <path d="M21 3v6h-6" />
     </svg>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  accent,
-  hint,
-}: {
-  label: string;
-  value: string;
-  accent: string;
-  hint?: string;
-}) {
-  return (
-    <div className="border-line bg-surface-2/60 rounded-[14px] border px-4 py-3">
-      <p className="text-fg-3 text-[10px] font-semibold tracking-[0.12em] uppercase">
-        {label}
-      </p>
-      <p
-        className="num mt-1 truncate text-[19px] leading-tight font-extrabold tabular-nums"
-        style={{ color: accent }}
-      >
-        {value}
-      </p>
-      {hint && <p className="text-fg-3 truncate text-[10.5px]">{hint}</p>}
-    </div>
   );
 }

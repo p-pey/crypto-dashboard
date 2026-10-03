@@ -1,5 +1,7 @@
 import "server-only";
 
+import { SOURCE_COUNTRY, type SourceCountry } from "./countries";
+
 /**
  * Aggregators the crawler reads.
  *
@@ -40,23 +42,15 @@ export type NewsCategory = "macro" | "markets" | "politics" | "other";
 
 export type NewsSourceConfig = {
   id: NewsSourceId;
-  /** Dictionary key for the outlet name shown in the UI. */
-  labelKey:
-    | "news.source.mehr"
-    | "news.source.irna"
-    | "news.source.isna"
-    | "news.source.khabaronline"
-    | "news.source.tehrantimes"
-    | "news.source.fed"
-    | "news.source.cnbc"
-    | "news.source.marketwatch"
-    | "news.source.wsj"
-    | "news.source.aljazeera"
-    | "news.source.france24"
-    | "news.source.scmp";
   feedUrl: string;
   lang: "fa" | "en";
   tier: NewsTier;
+  /**
+   * Which country this outlet reports on. Drives the country selector on the
+   * analysis page: the feed list is partitioned instead of re-crawled per
+   * country, so switching costs nothing upstream. See `~/constants/countries`.
+   */
+  country: SourceCountry;
   /**
    * Share of the composite vote. Iranian domestic news is weighted highest
    * because it is the only tier that reports the domestic FX, budget and
@@ -65,14 +59,16 @@ export type NewsSourceConfig = {
   weight: number;
 };
 
+/** A feed list entry before its country is resolved from `SOURCE_COUNTRY`. */
+type RawNewsSourceConfig = Omit<NewsSourceConfig, "country">;
+
 const BROWSER_UA =
   "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
-export const NEWS_SOURCES: NewsSourceConfig[] = [
+const RAW_NEWS_SOURCES: RawNewsSourceConfig[] = [
   // ---- Iran, domestic ----
   {
     id: "mehr",
-    labelKey: "news.source.mehr",
     feedUrl: "https://www.mehrnews.com/rss",
     lang: "fa",
     tier: "iran",
@@ -80,7 +76,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "irna",
-    labelKey: "news.source.irna",
     feedUrl: "https://irna.ir/rss",
     lang: "fa",
     tier: "iran",
@@ -88,7 +83,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "isna",
-    labelKey: "news.source.isna",
     feedUrl: "https://www.isna.ir/rss",
     lang: "fa",
     tier: "iran",
@@ -96,7 +90,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "khabaronline",
-    labelKey: "news.source.khabaronline",
     feedUrl: "https://khabaronline.ir/rss",
     lang: "fa",
     tier: "iran",
@@ -104,7 +97,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "tehrantimes",
-    labelKey: "news.source.tehrantimes",
     feedUrl: "https://tehrantimes.com/rss/",
     lang: "en",
     tier: "iran",
@@ -114,7 +106,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   // ---- United States, official ----
   {
     id: "fedMonetary",
-    labelKey: "news.source.fed",
     feedUrl: "https://www.federalreserve.gov/feeds/press_monetary.xml",
     lang: "en",
     tier: "usOfficial",
@@ -122,7 +113,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "fed",
-    labelKey: "news.source.fed",
     feedUrl: "https://www.federalreserve.gov/feeds/press_all.xml",
     lang: "en",
     tier: "usOfficial",
@@ -132,7 +122,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   // ---- United States, wires and markets ----
   {
     id: "cnbcEconomy",
-    labelKey: "news.source.cnbc",
     feedUrl: "https://www.cnbc.com/id/20910258/device/rss/rss.html",
     lang: "en",
     tier: "usWires",
@@ -140,7 +129,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "cnbcTop",
-    labelKey: "news.source.cnbc",
     feedUrl: "https://www.cnbc.com/id/100003114/device/rss/rss.html",
     lang: "en",
     tier: "usWires",
@@ -148,7 +136,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "marketwatch",
-    labelKey: "news.source.marketwatch",
     feedUrl: "https://feeds.content.dowjones.io/public/rss/mw_topstories",
     lang: "en",
     tier: "usWires",
@@ -156,7 +143,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "wsjMarkets",
-    labelKey: "news.source.wsj",
     feedUrl: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
     lang: "en",
     tier: "usWires",
@@ -166,7 +152,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   // ---- Regional and geopolitical ----
   {
     id: "aljazeera",
-    labelKey: "news.source.aljazeera",
     feedUrl: "https://www.aljazeera.com/xml/rss/all.xml",
     lang: "en",
     tier: "regional",
@@ -174,7 +159,6 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "france24",
-    labelKey: "news.source.france24",
     feedUrl: "https://www.france24.com/en/rss",
     lang: "en",
     tier: "regional",
@@ -182,13 +166,24 @@ export const NEWS_SOURCES: NewsSourceConfig[] = [
   },
   {
     id: "scmp",
-    labelKey: "news.source.scmp",
     feedUrl: "https://www.scmp.com/rss/91/feed",
     lang: "en",
     tier: "regional",
     weight: 0.8,
   },
 ];
+
+/**
+ * The country of every outlet is derived from one table in `~/constants/
+ * countries` rather than repeated here, so the feed list and the country
+ * selector can never disagree about who reports on what.
+ */
+export const NEWS_SOURCES: NewsSourceConfig[] = RAW_NEWS_SOURCES.map(
+  (source) => ({
+    ...source,
+    country: SOURCE_COUNTRY[source.id],
+  }),
+);
 
 export const NEWS_SOURCE_IDS: NewsSourceId[] = NEWS_SOURCES.map(
   (source) => source.id,

@@ -13,10 +13,22 @@ export const Themes = {
   dark: "dark",
   light: "light",
   glass: "glass",
+  mixer: "mixer",
 } as const;
 
-/** The order the switcher cycles through. */
-export const THEME_ORDER = [Themes.light, Themes.dark, Themes.glass] as const;
+/**
+ * The cycling order.
+ *
+ * Mixer is last on purpose: it is the most expressive theme and the least
+ * legible for a dense table, so it is the one you pick for the room rather than
+ * for the numbers. Everything readable comes first.
+ */
+export const THEME_ORDER = [
+  Themes.light,
+  Themes.dark,
+  Themes.glass,
+  Themes.mixer,
+] as const;
 
 /** The app boots into the light "Pearl" palette; `src/proxy.ts` seeds the cookie. */
 export const DEFAULT_APP_THEME: AppTheme = Themes.light;

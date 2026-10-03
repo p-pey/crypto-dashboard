@@ -4,11 +4,19 @@ import { Alert } from "antd";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import IrMarketBoard, { type QuoteUnit } from "~/features/iran/IrMarketBoard";
+import type { TradeIntent } from "~/features/iran/board.columns";
+import AccountPanel from "~/features/trading/AccountPanel";
+import ArbitragePanel from "~/features/trading/ArbitragePanel";
+import TradeTicketModal from "~/features/trading/TradeTicketModal";
+import { useTradingSecret } from "~/features/trading/useTradingSecret";
+import { buildMarketBoard } from "~/features/iran/iranMarket.mapper";
 import { AppContainer } from "~/lib/container";
 import { useI18n } from "~/i18n/I18nProvider";
 import IrPriceSocketService from "~/services/iran/IrPriceSocketService";
 import type { IrTicker } from "~/services/iran/iran.types";
 import { api } from "~/trpc/react";
+import type { ExchangeId } from "~/services/trading/trading.types";
+import type { MarketRow } from "~/services/iran/iran.market.types";
 
 const IrSocket = AppContainer.resolve(IrPriceSocketService);
 
@@ -24,12 +32,57 @@ const IrSocket = AppContainer.resolve(IrPriceSocketService);
 const POLL_INTERVAL_MS = 60_000;
 
 export default function IrPricePage() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const [tickers, setTickers] = useState<IrTicker[]>([]);
   const [unit, setUnit] = useState<QuoteUnit>("rial");
+  const [ticket, setTicket] = useState<
+    (TradeIntent & { venue: ExchangeId }) | null
+  >(null);
   const startedRef = useRef(false);
   const utils = api.useUtils();
   const refreshPolled = api.iran.refreshPolled.useMutation();
+
+  const { secret, setSecret, hasSecret } = useTradingSecret();
+
+  /**
+   * Which venues list each instrument, and under what symbol.
+   *
+   * Read from the trading metadata rather than from the board, because the board
+   * normalises symbols for display while an order has to be sent with the
+   * venue's own spelling.
+   */
+  const markets = api.trading.markets.useQuery(undefined, {
+    staleTime: 10 * 60_000,
+  });
+
+  const venuesFor = useMemo(
+    () => (instrumentId: string) =>
+      (markets.data ?? [])
+        .filter((spec) => spec.instrumentId === instrumentId)
+        .map((spec) => ({ exchange: spec.exchange, symbol: spec.symbol })),
+    [markets.data],
+  );
+
+  /**
+   * Opens the ticket for whichever venue the operator clicked.
+   *
+   * When several venues list the instrument the board row's own source is
+   * preferred, because that is the price the operator was looking at. Falling
+   * back to the first listed venue keeps the button working when the row came
+   * from a source with no trading market of its own.
+   */
+  const openTicket = useCallback(
+    (intent: TradeIntent & { source?: string }) => {
+      const venues = venuesFor(intent.instrumentId);
+      if (venues.length === 0) return;
+      const preferred =
+        venues.find((row) => row.exchange === intent.source)?.exchange ??
+        venues[0]?.exchange;
+      if (!preferred) return;
+      setTicket({ ...intent, venue: preferred });
+    },
+    [venuesFor],
+  );
 
   /**
    * The REST order book snapshot. It seeds the websocket layer and doubles as
@@ -128,6 +181,18 @@ export default function IrPricePage() {
     return stamps.length > 0 ? Math.max(...stamps) : null;
   }, [boardsUpdatedAt, dataUpdatedAt, nerkhUpdatedAt]);
 
+  /**
+   * The same row set the board renders.
+   *
+   * Built once here so the spread panel reads from it instead of assembling a
+   * second copy from the same three feeds, which would double the work and
+   * could disagree with what the operator is looking at.
+   */
+  const boardRows: MarketRow[] = useMemo(
+    () => buildMarketBoard({ tickers, boards: boards?.boards ?? [], nerkh, locale }),
+    [boards, locale, nerkh, tickers],
+  );
+
   const alerts = useMemo(() => {
     const list: { key: string; message: string; description: string }[] = [];
 
@@ -209,7 +274,38 @@ export default function IrPricePage() {
           onRefresh={refresh}
           refreshing={refreshPolled.isPending}
           updatedAt={lastUpdated}
+          onTrade={hasSecret ? (intent) => openTicket(intent) : null}
         />
+
+        {/*
+          The account and spread panels reuse the rows already assembled for the
+          board, so neither adds a request against a rate-limited venue.
+        */}
+        <AccountPanel secret={secret} hasSecret={hasSecret} onSecret={setSecret} />
+
+        <ArbitragePanel
+          rows={boardRows}
+          secret={secret}
+          hasSecret={hasSecret}
+          venuesFor={venuesFor}
+        />
+
+        {ticket ? (
+          <TradeTicketModal
+            open
+            onClose={() => setTicket(null)}
+            instrumentId={ticket.instrumentId}
+            side={ticket.side}
+            priceInRial={ticket.priceInRial}
+            venues={venuesFor(ticket.instrumentId)}
+            defaultVenue={ticket.venue}
+            secret={secret}
+            onPlaced={() => {
+              void utils.trading.balances.invalidate();
+              void utils.trading.openOrders.invalidate();
+            }}
+          />
+        ) : null}
       </div>
     </motion.div>
   );

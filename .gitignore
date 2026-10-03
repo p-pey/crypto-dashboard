@@ -44,3 +44,5 @@ yarn-error.log*
 
 # idea files
 .idea
+# Trading ledger, paper balances and the notification outbox
+.data/

@@ -13,7 +13,7 @@ import {
   Typography,
 } from "antd";
 import { useMemo } from "react";
-import { VERDICT_COLOR } from "~/features/coins/CoinDataTable.utils";
+import { VERDICT_COLOR } from "~/features/coins/coinVerdict";
 import { formatDateTime, formatNumber, formatPercent } from "~/i18n/format";
 import { useI18n } from "~/i18n/I18nProvider";
 import type { Locale } from "~/i18n/config";

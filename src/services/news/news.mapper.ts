@@ -74,6 +74,7 @@ export function mapFeed(
       title,
       link: item.link,
       source: config.id,
+      country: config.country,
       tier: config.tier,
       publishedAt: item.publishedAt,
       category: classifyHeadline(title),

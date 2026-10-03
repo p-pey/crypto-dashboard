@@ -19,6 +19,12 @@ const ICONS: Record<AppTheme, { path: string; color: string }> = {
     path: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z",
     color: "text-brand-2",
   },
+  mixer: {
+    // A broadcast aperture over a horizon line. Mixer's own mark was a
+    // segmented lens, which reads at 16px where a waveform does not.
+    path: "M12 3.2a8.8 8.8 0 1 1 0 17.6 8.8 8.8 0 0 1 0-17.6Zm0 3.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4ZM12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2",
+    color: "text-brand-2",
+  },
   glass: {
     // A droplet over a curved baseline: liquid glass without pretending to be
     // a literal material.

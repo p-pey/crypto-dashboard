@@ -1,4 +1,5 @@
 import type { NewsSourceId } from "~/constants/newsSources";
+import type { SourceCountry } from "~/constants/countries";
 
 /**
  * What a headline is *about*.
@@ -31,6 +32,8 @@ export type NewsArticle = {
   title: string;
   link: string;
   source: NewsSourceId;
+  /** Which country's economy this headline speaks to. */
+  country: SourceCountry;
   tier: "iran" | "usOfficial" | "usWires" | "regional";
   publishedAt: number;
   category: "macro" | "markets" | "politics" | "other";
@@ -58,6 +61,9 @@ export type NewsArticle = {
 
 export type NewsFeedStatus = {
   source: NewsSourceId;
+  country: SourceCountry;
+  /** Vote share of this outlet in the composite, from the source config. */
+  weight: number;
   ok: boolean;
   count: number;
   error: string | null;

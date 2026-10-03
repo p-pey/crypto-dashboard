@@ -6,12 +6,10 @@ import type {
 /**
  * Assets tracked with a live order book and websocket on every exchange.
  *
- * Only XAUT is treated as gold here: none of the four exchanges currently list
- * a physical 18k gold market (`GOLD18IRT` answers 400 on Nobitex, 422 on
- * Wallex and 404 on Bitpin and Tabdeal), so 18k gold is sourced from
- * nerkh.io instead and shows up as a single board row rather than four dead
- * ones. Everything else these exchanges list arrives through the wide Wallex
- * market list.
+ * Tether plus the two tokenised golds. Physical 18k gold is not here: none of
+ * the four venues list it (`GOLD18IRT` answers 400 on Nobitex, 422 on Wallex,
+ * 404 on Bitpin and Tabdeal), so it is sourced from nerkh.io and appears as a
+ * single reference row rather than four dead ones.
  */
 export const IR_ASSETS: IrAssetConfig[] = [
   {
@@ -26,6 +24,12 @@ export const IR_ASSETS: IrAssetConfig[] = [
     labelKey: "irPrice.assets.xaut",
     kind: "gold",
   },
+  {
+    id: "paxg",
+    label: "PAXG / IRT",
+    labelKey: "irPrice.assets.paxg",
+    kind: "gold",
+  },
 ];
 
 /**
@@ -37,20 +41,30 @@ export const IR_ASSETS: IrAssetConfig[] = [
  */
 const USDT_SYMBOLS = {
   nobitex: [{ symbol: "USDTIRT", quoteScale: 1 }],
-  wallex: [
-    { symbol: "USDTTMN", quoteScale: 10 },
-    { symbol: "USDTIRT", quoteScale: 1 },
-  ],
+  // Wallex quotes only TMN and USDT; there is no IRT market to fall back to.
+  wallex: [{ symbol: "USDTTMN", quoteScale: 10 }],
   bitpin: [{ symbol: "USDT_IRT", quoteScale: 10 }],
   tabdeal: [{ symbol: "USDT_IRT", quoteScale: 10, streamSymbol: "usdtirt" }],
 } as const;
 
+/**
+ * PAXG markets.
+ *
+ * Verified live on all four venues: `PAXGIRT`, `PAXGTMN`, `PAXG_IRT` and
+ * `PAXGIRT` respectively. Note Wallex has no `IRT` market at all, so the `_TMN`
+ * entry is the only candidate there - the earlier `USDTIRT`/`XAUTIRT` fallbacks
+ * for Wallex could never have answered and have been removed.
+ */
+const PAXG_SYMBOLS = {
+  nobitex: [{ symbol: "PAXGIRT", quoteScale: 1 }],
+  wallex: [{ symbol: "PAXGTMN", quoteScale: 10 }],
+  bitpin: [{ symbol: "PAXG_IRT", quoteScale: 10 }],
+  tabdeal: [{ symbol: "PAXG_IRT", quoteScale: 10, streamSymbol: "paxgirt" }],
+} as const;
+
 const XAUT_SYMBOLS = {
   nobitex: [{ symbol: "XAUTIRT", quoteScale: 1 }],
-  wallex: [
-    { symbol: "XAUTTMN", quoteScale: 10 },
-    { symbol: "XAUTIRT", quoteScale: 1 },
-  ],
+  wallex: [{ symbol: "XAUTTMN", quoteScale: 10 }],
   bitpin: [{ symbol: "XAUT_IRT", quoteScale: 10 }],
   tabdeal: [{ symbol: "XAUT_IRT", quoteScale: 10, streamSymbol: "xautirt" }],
 } as const;
@@ -61,6 +75,7 @@ function symbolsOf(
   return {
     usdt: [...USDT_SYMBOLS[id]],
     xaut: [...XAUT_SYMBOLS[id]],
+    paxg: [...PAXG_SYMBOLS[id]],
   };
 }
 

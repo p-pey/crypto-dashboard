@@ -125,7 +125,31 @@ function statusOf(status: IrTicker["status"]): MarketRow["status"] {
 const ASSET_LABEL_KEYS: Record<IrTicker["asset"], TranslationKey> = {
   usdt: "irPrice.assets.usdt",
   xaut: "irPrice.assets.xaut",
+  paxg: "irPrice.assets.paxg",
 };
+
+/**
+ * The instruments this board shows.
+ *
+ * The operator asked for a short, deliberate list rather than every market the
+ * exchanges carry: Tether, the two tokenised golds, and physical 18k gram gold
+ * as the reference rate. Everything else - the other 1,300+ markets on Wallex,
+ * the coins nerkh.io lists, the fiat row - is dropped here.
+ *
+ * The allowlist is on **base asset**, not on symbol, for the reason the
+ * stablecoin check below already documents: `PAXGUSDT` is a PAXG market that
+ * happens to end in `USDT`, and a substring test would file it under Tether.
+ */
+const TRACKED_BASE_ASSETS = new Set(["USDT", "XAUT", "PAXG"]);
+
+/**
+ * nerkh.io instrument ids that belong on the board.
+ *
+ * `GOLD18K` is the 18k gram reference. It is shown, and it is deliberately not
+ * tradeable: no Iranian venue lists a physical gram market, so a buy button on
+ * it would have nowhere to send the order.
+ */
+const TRACKED_NERKH_KEYS = new Set(["USDT", "GOLD18K"]);
 
 function tickerToRow(ticker: IrTicker): MarketRow {
   return {
@@ -279,15 +303,20 @@ export function buildMarketBoard(input: MarketBoardInput): MarketRow[] {
 }
 
 /**
- * Drops stablecoins other than Tether. The board is grouped by category, so
- * leaving a stray USDC row in would put it beside the USDT rows it duplicates.
+ * The board's allowlist.
+ *
+ * Exchange rows are matched on `baseAsset` and nerkh rows on their instrument
+ * id, because the two feeds name the same instrument differently: an exchange
+ * row says `XAUT` while a nerkh row says `GOLD18K`.
+ *
+ * Matching on the base asset rather than the symbol is what keeps `PAXGUSDT`
+ * filed as gold rather than being mistaken for a Tether market.
  */
 function isIncluded(row: MarketRow): boolean {
-  if (row.category !== "stablecoin") return true;
-  // Matched on the base asset, not the market symbol: `USDCUSDT` is a USDC
-  // market that happens to end in `USDT`, and a substring test would let it
-  // through as if it were Tether.
-  return STABLECOIN_BASES.has(row.baseAsset);
+  if (row.source === "nerkh") {
+    return TRACKED_NERKH_KEYS.has(row.baseAsset.toUpperCase());
+  }
+  return TRACKED_BASE_ASSETS.has(row.baseAsset.toUpperCase());
 }
 
 /** Sources in display order, so the deep books sit above the wide board. */

@@ -85,6 +85,8 @@ export default class NewsCrawlerService {
             tier: source.tier,
             status: {
               source: source.id,
+              country: source.country,
+              weight: source.weight,
               tier: source.tier,
               ok: articles.length > 0,
               count: articles.length,
@@ -104,6 +106,8 @@ export default class NewsCrawlerService {
             tier: source.tier,
             status: {
               source: source.id,
+              country: source.country,
+              weight: source.weight,
               tier: source.tier,
               ok: false,
               count: 0,
@@ -310,6 +314,8 @@ function emptySnapshot(error: string | null): NewsSnapshot {
     fetchedAt: Date.now(),
     sources: NEWS_SOURCES.map((source) => ({
       source: source.id,
+      country: source.country,
+      weight: source.weight,
       ok: false,
       count: 0,
       error,

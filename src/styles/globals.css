@@ -152,6 +152,65 @@
   --grid-line: rgb(255 255 255 / 0.05);
 }
 
+
+/* ------------------------------------------------------------------ *
+ * Mixer
+ *
+ * The look Microsoft built for Mixer: near-black, cinematic, and lit by
+ * large soft violet and magenta orbs rather than by a UI chrome. The
+ * defining traits are a deeper floor than Obsidian, a violet-leaning
+ * brand ramp, wider cards and a much stronger bloom behind the content.
+ *
+ * It is the most expressive of the four and the least legible for dense
+ * tables, which is why it sits last in THEME_ORDER - Obsidian and Glass
+ * are the better reading surfaces and this is the one you choose for the
+ * room, not for the numbers.
+ * ------------------------------------------------------------------ */
+[data-theme="mixer"] {
+  --bg-base: #07060d;
+  --bg-deep: #040309;
+
+  /* Near-opaque. Mixer read as a lit void, and a panel you can see the
+     background through stops being a panel and becomes haze. */
+  --surface: rgb(17 15 28 / 0.92);
+  --surface-2: rgb(23 20 38 / 0.86);
+  --surface-3: rgb(34 29 55 / 0.9);
+  --border: rgb(178 152 255 / 0.14);
+  --border-strong: rgb(178 152 255 / 0.3);
+
+  --text: #f7f4ff;
+  --text-2: #bdb4d8;
+  --text-3: #8379a3;
+
+  /* Mixer's violet, pushed far enough to be recognisable. */
+  --brand: #8b5cf6;
+  --brand-2: #a78bfa;
+  --brand-soft: rgb(139 92 246 / 0.22);
+  --on-brand: #ffffff;
+
+  --cyan: #22d3ee;
+  --mint: #34d399;
+  --amber: #fbbf24;
+  --rose: #f472b6;
+
+  --up: #34d399;
+  --down: #fb7185;
+  --up-soft: rgb(52 211 153 / 0.16);
+  --down-soft: rgb(251 113 133 / 0.16);
+
+  /* The signature: violet and magenta bloom, magenta on the right as well
+     as the left. Glass keeps its glow restrained because it has frosted
+     panels to sit on; here the background IS the design, so it is louder. */
+  --glow-1: rgb(139 92 246 / 0.55);
+  --glow-2: rgb(236 72 153 / 0.34);
+  --glow-3: rgb(99 102 241 / 0.38);
+
+  --shadow-color: 265 60% 2%;
+  --ring: rgb(167 139 250 / 0.7);
+
+  --grid-line: rgb(178 152 255 / 0.06);
+}
+
 @theme inline {
   --color-bg: var(--bg-base);
   --color-bg-deep: var(--bg-deep);
@@ -625,6 +684,31 @@
 
   [data-theme="glass"] .orb {
     opacity: 0.6;
+  }
+
+  /* Mixer: the orbs are the design rather than decoration behind one, so they
+     run larger and brighter than Glass does. A CSS-only transform rather than
+     new keyframes, which keeps the OS reduced-motion rule above still in
+     charge of stopping them. */
+  [data-theme="mixer"] .orb {
+    opacity: 0.85;
+    scale: 1.35;
+  }
+
+  [data-theme="mixer"] .aurora {
+    filter: saturate(1.35);
+  }
+
+  [data-theme="mixer"] .aurora::after {
+    opacity: 0.5;
+  }
+
+  /* Cards lift with a violet bloom rather than a neutral one. */
+  [data-theme="mixer"] .panel-hover:hover {
+    border-color: color-mix(in srgb, var(--brand-2) 55%, var(--border));
+    box-shadow:
+      var(--shadow-panel),
+      0 30px 80px -30px var(--glow-1);
   }
 
   /* The lit top edge. Done with `border-top-color` rather than an inset

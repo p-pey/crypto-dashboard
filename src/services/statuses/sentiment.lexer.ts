@@ -87,14 +87,42 @@ const BEARISH: Record<string, number> = {
   downgraded: -3,
 };
 
+/**
+ * Decodes the entity set that actually turns up in RSS titles.
+ *
+ * Feeds escape far more than the XML five. A CNBC headline carrying
+ * `Tesla&#x2019;s` reached the UI and the model prompt with the entity intact,
+ * which reads as corruption and wastes prompt tokens on punctuation.
+ *
+ * `&amp;` is decoded last, deliberately: it is the one entity that can introduce
+ * another, so decoding it first would turn `&amp;lt;` into a stray `<`.
+ */
 function escapeXml(value: string): string {
   return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) =>
+      safeFromCodePoint(Number.parseInt(hex, 16)),
+    )
+    .replace(/&#(\d+);/g, (_, dec: string) =>
+      safeFromCodePoint(Number.parseInt(dec, 10)),
+    )
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
     .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&ndash;/g, "\u2013")
+    .replace(/&mdash;/g, "\u2014")
+    .replace(/&hellip;/g, "\u2026")
     .replace(/&amp;/g, "&");
+}
+
+function safeFromCodePoint(code: number): string {
+  if (!Number.isInteger(code) || code < 0 || code > 0x10ffff) return "";
+  try {
+    return String.fromCodePoint(code);
+  } catch {
+    return "";
+  }
 }
 
 function stripHtml(value: string): string {

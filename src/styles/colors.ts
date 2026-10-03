@@ -122,6 +122,38 @@ export const COLORS: Record<keyof typeof Themes, ThemePalette> = {
     upSoft: "rgb(74 232 186 / 0.18)",
     downSoft: "rgb(255 125 153 / 0.18)",
   },
+
+  /**
+   * The Mixer palette, mirroring the `[data-theme="mixer"]` token block.
+   *
+   * Resolved rather than alpha, for the same reason as glass: antd composites
+   * its own tokens and cannot blend against a backdrop it cannot see, so a
+   * translucent value renders as a washed grey box next to a near-opaque card.
+   */
+  mixer: {
+    base: "#07060d",
+    deep: "#040309",
+    surface: "#1b1730",
+    surface2: "#241f3e",
+    surface3: "#2b2450",
+    border: "rgb(178 152 255 / 0.18)",
+    borderStrong: "rgb(178 152 255 / 0.34)",
+    text: "#f7f4ff",
+    text2: "#bdb4d8",
+    text3: "#8379a3",
+    brand: "#8b5cf6",
+    brand2: "#a78bfa",
+    brandSoft: "rgb(139 92 246 / 0.28)",
+    onBrand: "#ffffff",
+    cyan: "#22d3ee",
+    mint: "#34d399",
+    amber: "#fbbf24",
+    rose: "#f472b6",
+    up: "#34d399",
+    down: "#fb7185",
+    upSoft: "rgb(52 211 153 / 0.2)",
+    downSoft: "rgb(251 113 133 / 0.2)",
+  },
 };
 
 /**

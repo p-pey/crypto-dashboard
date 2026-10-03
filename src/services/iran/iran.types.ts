@@ -1,6 +1,18 @@
 export type IrExchangeId = "nobitex" | "wallex" | "bitpin" | "tabdeal";
 
-export type IrAssetId = "usdt" | "xaut";
+/**
+ * The tracked instruments.
+ *
+ * PAXG was added alongside XAUT because the operator tracks tokenised gold, and
+ * the two are listed separately by all four venues with different tick sizes -
+ * treating them as one asset would produce an order one venue accepts and the
+ * other rejects.
+ *
+ * Physical 18k gram gold is deliberately **not** here. No Iranian venue lists
+ * it, so it is sourced from nerkh.io as a reference row with no order buttons
+ * and gets its id from the nerkh side of the board.
+ */
+export type IrAssetId = "usdt" | "xaut" | "paxg";
 
 export type IrSocketProtocol = "centrifugo" | "socketio" | "jsonrpc";
 
@@ -32,7 +44,7 @@ export type IrAssetConfig = {
   /** Short technical label, kept for logs and the URL. */
   label: string;
   /** Dictionary key for the human readable name shown in the UI. */
-  labelKey: "irPrice.assets.usdt" | "irPrice.assets.xaut";
+  labelKey: "irPrice.assets.usdt" | "irPrice.assets.xaut" | "irPrice.assets.paxg";
   kind: IrAssetKind;
 };
 

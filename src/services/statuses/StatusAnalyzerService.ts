@@ -1,6 +1,6 @@
 import { AppContainer } from "~/lib/container";
 import { StatusesRepository } from "~/repository/statuses.repository";
-import { completeWithLlm, resolveLlmConfig } from "./StatusLlmService";
+import StatusAiService from "./StatusAiService";
 import { StatusScorer } from "./StatusScorer";
 import { StatusSourceService } from "./StatusSourceService";
 import type {
@@ -14,18 +14,7 @@ import type {
 
 const Sources = AppContainer.resolve(StatusSourceService);
 const Repo = AppContainer.resolve(StatusesRepository);
-
-const SYSTEM_PROMPT = [
-  "You are a cautious crypto market analyst writing a short brief for a trading dashboard.",
-  "You are given pre-computed technical, on-chain, community and news signals for ONE coin.",
-  "Rules:",
-  "- Never invent numbers. Every figure you cite must appear in the input.",
-  "- Do not promise returns or give financial advice.",
-  "- Keep it under 90 words, plain prose, no markdown headings or bullet lists.",
-  "- Start with one of: STRONG BUY, BUY, HOLD, REDUCE, AVOID.",
-  "- Then justify it from the strongest signals and name the main risk.",
-  "- If signals conflict, say so plainly rather than forcing a call.",
-].join("\n");
+const Narrative = AppContainer.resolve(StatusAiService);
 
 /**
  * Orchestrates one coin's daily analysis: collect every source in parallel,
@@ -128,9 +117,12 @@ export class StatusAnalyzerService {
   }
 
   /**
-   * Asks the configured free LLM to turn the scored signals into prose. Any
-   * failure - no key, bad key, timeout, refusal - falls back to the deterministic
-   * narrative, so this step can never break a status.
+   * Asks the active model to turn the scored signals into prose.
+   *
+   * Any failure - no runtime, a dead key, a timeout, a refusal - falls back to
+   * the deterministic narrative, so this step can never break a status. The
+   * section never throws, so that guarantee costs one null check rather than a
+   * try/catch.
    */
   private async enhanceWithLlm(context: {
     verdict: CoinStatus["verdict"];
@@ -160,104 +152,15 @@ export class StatusAnalyzerService {
       error: null as string | null,
     };
 
-    const config = resolveLlmConfig();
-    if (!config) return fallback;
-
-    const result = await completeWithLlm(
-      config,
-      SYSTEM_PROMPT,
-      buildUserPrompt(context),
-    );
-
-    const text = result.text?.trim();
-    if (!text) {
-      return {
-        ...fallback,
-        provider: result.provider,
-        model: result.model,
-        error: result.error ?? "llm returned empty text",
-      };
-    }
+    const result = await Narrative.run(context);
+    if (!result.data) return fallback;
 
     return {
-      summary: text,
+      summary: result.data,
       generatedBy: "llm",
       provider: result.provider,
       model: result.model,
       error: null,
     };
   }
-}
-
-function buildUserPrompt(context: {
-  verdict: string;
-  score: number;
-  confidence: number;
-  signals: StatusSignal[];
-  technicals: StatusTechnicals | null;
-  market: StatusMarketSnapshot | null;
-  news: StatusNewsItem[];
-  unavailable: string[];
-}): string {
-  const lines: string[] = [];
-
-  lines.push(
-    `Composite score: ${context.score.toFixed(1)} on a -100..+100 scale.`,
-  );
-  lines.push(`Deterministic verdict: ${context.verdict}.`);
-  lines.push(`Signal coverage: ${context.confidence.toFixed(0)}%.`);
-  lines.push("");
-
-  lines.push("Signals:");
-  for (const signal of context.signals) {
-    lines.push(
-      signal.available
-        ? `- ${signal.label}: score ${signal.score.toFixed(0)} (${signal.detail})`
-        : `- ${signal.label}: UNAVAILABLE (${signal.detail})`,
-    );
-  }
-
-  if (context.technicals) {
-    lines.push("");
-    lines.push("Technicals (1h candles):");
-    lines.push(`- price ${context.technicals.price}`);
-    lines.push(`- RSI14 ${context.technicals.rsi14?.toFixed(1) ?? "n/a"}`);
-    lines.push(
-      `- MACD histogram ${context.technicals.macdHistogram?.toFixed(6) ?? "n/a"}`,
-    );
-    lines.push(
-      `- ATR ${context.technicals.atrPct?.toFixed(2) ?? "n/a"}% of price`,
-    );
-    lines.push(`- 24h ${context.technicals.change24h?.toFixed(2) ?? "n/a"}%`);
-    lines.push(`- 7d ${context.technicals.change7d?.toFixed(2) ?? "n/a"}%`);
-  }
-
-  if (context.market) {
-    lines.push("");
-    lines.push("Market / community:");
-    lines.push(`- market cap rank ${context.market.marketCapRank ?? "n/a"}`);
-    lines.push(`- bullish votes ${context.market.votesUpPercent ?? "n/a"}%`);
-    lines.push(`- watchlist users ${context.market.watchlistUsers ?? "n/a"}`);
-    lines.push(`- from ATH ${context.market.athChangePercent ?? "n/a"}%`);
-    lines.push(
-      `- fear & greed ${context.market.fearAndGreed ?? "n/a"} (${context.market.fearAndGreedLabel ?? "n/a"})`,
-    );
-  }
-
-  if (context.news.length > 0) {
-    lines.push("");
-    lines.push("Recent headlines (sentiment -1..1):");
-    for (const item of context.news) {
-      lines.push(
-        `- [${item.sentiment.toFixed(2)}] ${item.title} (${item.source})`,
-      );
-    }
-  }
-
-  if (context.unavailable.length > 0) {
-    lines.push("");
-    lines.push(`Sources that failed: ${context.unavailable.join("; ")}`);
-  }
-
-  return lines.join("\n");
 }

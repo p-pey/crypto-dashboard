@@ -6,7 +6,7 @@ import { navHref } from "~/constants/navigation";
 import { formatSignedPercent } from "~/i18n/format";
 import { useI18n } from "~/i18n/I18nProvider";
 import { api } from "~/trpc/react";
-import type { Coin } from "~/types/types";
+import type { CoinFundamentalDto } from "~/server/api/overview/overview.mapper";
 
 /**
  * Pixels the strip travels per second.
@@ -28,7 +28,7 @@ export default function PriceTicker() {
     refetchInterval: 60_000,
   });
 
-  const items: Coin[] = data ?? [];
+  const items: CoinFundamentalDto[] = data ?? [];
   const home = navHref(locale, "/");
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -92,15 +92,15 @@ export default function PriceTicker() {
                 aria-hidden={dup > 0}
               >
                 {items.map((coin) => {
-                  const up = coin.price_change_percentage_24h >= 0;
+                  const up = (coin.changePercent24h ?? 0) >= 0;
                   return (
                     <Link
-                      key={`${dup}-${coin.symbol}`}
+                      key={`${dup}-${coin.id}`}
                       href={home}
                       className="num hover:bg-surface-2 flex items-center gap-1.5 px-3.5 py-1 text-[12px] whitespace-nowrap transition-colors"
                     >
                       <span className="text-fg-2 font-semibold">
-                        {coin.symbol.toUpperCase()}
+                        {coin.name.slice(0, 3).toUpperCase()}
                       </span>
                       <span
                         className="font-bold tabular-nums"
@@ -108,7 +108,7 @@ export default function PriceTicker() {
                       >
                         {formatSignedPercent(
                           locale,
-                          coin.price_change_percentage_24h,
+                          coin.changePercent24h ?? 0,
                         )}
                       </span>
                       <svg
