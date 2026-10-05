@@ -164,10 +164,19 @@ export class TradingRepository {
       )
       .get(exchange, asset) as { free: string; locked: string } | undefined;
 
-    const free = addStrings(row?.free ?? "0", from === "free" ? negate(delta) : delta);
-    const locked = addStrings(row?.locked ?? "0", from === "locked" ? negate(delta) : delta);
+    const free = addStrings(
+      row?.free ?? "0",
+      from === "free" ? negate(delta) : delta,
+    );
+    const locked = addStrings(
+      row?.locked ?? "0",
+      from === "locked" ? negate(delta) : delta,
+    );
 
-    if (parseDecimal(free).mantissa < 0n || parseDecimal(locked).mantissa < 0n) {
+    if (
+      parseDecimal(free).mantissa < 0n ||
+      parseDecimal(locked).mantissa < 0n
+    ) {
       throw new Error(`insufficient paper balance for ${asset} at ${exchange}`);
     }
 
@@ -286,11 +295,23 @@ export class TradingRepository {
     transact(() => {
       if (order.side === "buy") {
         // Spend quote, receive base.
-        this.adjustPaperBalance(order.exchange, assets.quote, negate(filledValue));
-        this.adjustPaperBalance(order.exchange, assets.base, order.filledAmount);
+        this.adjustPaperBalance(
+          order.exchange,
+          assets.quote,
+          negate(filledValue),
+        );
+        this.adjustPaperBalance(
+          order.exchange,
+          assets.base,
+          order.filledAmount,
+        );
       } else {
         // Give up base, receive quote.
-        this.adjustPaperBalance(order.exchange, assets.base, negate(order.filledAmount));
+        this.adjustPaperBalance(
+          order.exchange,
+          assets.base,
+          negate(order.filledAmount),
+        );
         this.adjustPaperBalance(order.exchange, assets.quote, filledValue);
       }
     });

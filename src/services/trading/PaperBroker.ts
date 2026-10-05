@@ -99,7 +99,11 @@ export class PaperBroker {
       spec.tickSize,
       request_.side === "buy" ? "down" : "up",
     );
-    const amount = snapToStep(parseDecimal(request_.amount), spec.stepSize, "down");
+    const amount = snapToStep(
+      parseDecimal(request_.amount),
+      spec.stepSize,
+      "down",
+    );
 
     if (!price.exact || !amount.exact) {
       throw new ExchangeError(
@@ -113,10 +117,15 @@ export class PaperBroker {
     const costed = multiply(parseDecimal(price.value), sized);
 
     if (isNegative(sized) || sized.mantissa === 0n) {
-      throw new ExchangeError(request_.exchange, "invalid_request", "amount must be positive");
+      throw new ExchangeError(
+        request_.exchange,
+        "invalid_request",
+        "amount must be positive",
+      );
     }
 
-    const venueMarket = VENUE_MARKETS[request_.exchange]?.[request_.instrumentId];
+    const venueMarket =
+      VENUE_MARKETS[request_.exchange]?.[request_.instrumentId];
     const minimum = venueMarket?.minNotional ?? String(PAPER_MIN_NOTIONAL_RIAL);
 
     // Notional is compared in the venue's own quote unit, so a Toman market is
@@ -385,4 +394,3 @@ function bestAtMost(
   }
   return false;
 }
-

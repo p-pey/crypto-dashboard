@@ -2,11 +2,7 @@ import type { BinanceTicker } from "~/services/binance/binance.types";
 import { coinPriceHistory } from "~/services/binance/priceHistory";
 import { AppSignleton } from "~/lib/container";
 import { applyRank, nextSort, sortRows } from "./coinSort";
-import {
-  DEFAULT_SORT,
-  type CoinRow,
-  type CoinSort,
-} from "./coin.types";
+import { DEFAULT_SORT, type CoinRow, type CoinSort } from "./coin.types";
 
 /**
  * The coin table's data store.
@@ -171,7 +167,8 @@ export class CoinStore {
 
     // A coin whose price has not moved still refreshes its volume and trade
     // count, so the row is replaced either way - but only for that coin.
-    const direction = Number.isFinite(last) && Number.isFinite(next) ? next - last : 0;
+    const direction =
+      Number.isFinite(last) && Number.isFinite(next) ? next - last : 0;
     if (direction !== 0) {
       coinPriceHistory.push(ticker.s, next);
     }
@@ -407,7 +404,9 @@ export class CoinStore {
     before: number,
     after: number,
   ): boolean {
-    const index = this.ordered.findIndex((entry) => entry.symbol === row.symbol);
+    const index = this.ordered.findIndex(
+      (entry) => entry.symbol === row.symbol,
+    );
     if (index === -1) return true;
 
     if (before === null || after === null) return true;

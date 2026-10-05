@@ -9,7 +9,11 @@ import {
   ExchangeError,
   type ProtectionResult,
 } from "~/services/trading/exchange.port";
-import { parseDecimal, textOf, toPlainString } from "~/services/trading/decimal";
+import {
+  parseDecimal,
+  textOf,
+  toPlainString,
+} from "~/services/trading/decimal";
 import type {
   Balance,
   MarketSpec,
@@ -188,7 +192,9 @@ export class TabdealAdapter extends BaseExchangeAdapter {
     params.timestamp = String(timestamp);
 
     const payload = stringifyQuery(params);
-    const signature = createHmac("sha256", secret).update(payload).digest("hex");
+    const signature = createHmac("sha256", secret)
+      .update(payload)
+      .digest("hex");
 
     const body = await request<T>({
       exchange: this.id,
@@ -284,7 +290,10 @@ export class TabdealAdapter extends BaseExchangeAdapter {
     const levels = (raw: unknown): [string, string][] =>
       Array.isArray(raw)
         ? raw
-            .filter((row): row is [string, string] => Array.isArray(row) && row.length >= 2)
+            .filter(
+              (row): row is [string, string] =>
+                Array.isArray(row) && row.length >= 2,
+            )
             .map((row) => [num(row[0]), num(row[1])])
         : [];
 
@@ -423,7 +432,10 @@ export class TabdealAdapter extends BaseExchangeAdapter {
     );
   }
 
-  async listOrderHistory(options: { symbol?: string; limit?: number }): Promise<Order[]> {
+  async listOrderHistory(options: {
+    symbol?: string;
+    limit?: number;
+  }): Promise<Order[]> {
     const spec = options.symbol ? this.specForSymbol(options.symbol) : null;
     const payload = await this.signed<TabdealOrder[]>({
       method: "GET",
@@ -439,14 +451,20 @@ export class TabdealAdapter extends BaseExchangeAdapter {
     );
   }
 
-  async listTrades(options: { symbol?: string; limit?: number }): Promise<Trade[]> {
+  async listTrades(options: {
+    symbol?: string;
+    limit?: number;
+  }): Promise<Trade[]> {
     const spec = options.symbol ? this.specForSymbol(options.symbol) : null;
     if (!spec) return [];
 
     const payload = await this.signed<Record<string, unknown>[]>({
       method: "GET",
       path: "/myTrades",
-      query: { tabdealSymbol: spec.symbol, limit: Math.min(options.limit ?? 100, 1000) },
+      query: {
+        tabdealSymbol: spec.symbol,
+        limit: Math.min(options.limit ?? 100, 1000),
+      },
       idempotent: true,
     });
 
@@ -476,37 +494,49 @@ export class TabdealAdapter extends BaseExchangeAdapter {
       idempotent: true,
     });
 
-    return (Array.isArray(payload) ? payload : [])
-      // Rows with no size are slots, not positions.
-      .filter((row) => parseDecimal(num(row.positionAmt)).mantissa !== 0n)
-      .map((row) => {
-        const amount = num(row.positionAmt);
-        const instrumentId = instrumentForFuturesSymbol(textOf(row.symbol));
-        return {
-          id: `${textOf(row.symbol)}:${amount}`,
-          exchange: this.id,
-          kind: "futures",
-          instrumentId,
-          symbol: textOf(row.symbol),
-          // A negative position amount is a short.
-          side: parseDecimal(amount).mantissa < 0n ? "short" : "long",
-          status: "open",
-          leverage: row.leverage === undefined ? null : num(row.leverage),
-          size: toPlainString(parseDecimal(amount).mantissa < 0n
-            ? { mantissa: -parseDecimal(amount).mantissa, scale: parseDecimal(amount).scale }
-            : parseDecimal(amount)),
-          entryPrice: num(row.entryPrice),
-          liquidationPrice:
-            row.liquidationPrice === undefined ? null : num(row.liquidationPrice),
-          unrealizedPnl:
-            row.unRealizedProfit === undefined ? null : num(row.unRealizedProfit),
-          unrealizedPnlPercent: null,
-          realizedPnl: null,
-          margin: row.initialMargin === undefined ? null : num(row.initialMargin),
-          openedAt: null,
-          closedAt: null,
-        } satisfies Position;
-      });
+    return (
+      (Array.isArray(payload) ? payload : [])
+        // Rows with no size are slots, not positions.
+        .filter((row) => parseDecimal(num(row.positionAmt)).mantissa !== 0n)
+        .map((row) => {
+          const amount = num(row.positionAmt);
+          const instrumentId = instrumentForFuturesSymbol(textOf(row.symbol));
+          return {
+            id: `${textOf(row.symbol)}:${amount}`,
+            exchange: this.id,
+            kind: "futures",
+            instrumentId,
+            symbol: textOf(row.symbol),
+            // A negative position amount is a short.
+            side: parseDecimal(amount).mantissa < 0n ? "short" : "long",
+            status: "open",
+            leverage: row.leverage === undefined ? null : num(row.leverage),
+            size: toPlainString(
+              parseDecimal(amount).mantissa < 0n
+                ? {
+                    mantissa: -parseDecimal(amount).mantissa,
+                    scale: parseDecimal(amount).scale,
+                  }
+                : parseDecimal(amount),
+            ),
+            entryPrice: num(row.entryPrice),
+            liquidationPrice:
+              row.liquidationPrice === undefined
+                ? null
+                : num(row.liquidationPrice),
+            unrealizedPnl:
+              row.unRealizedProfit === undefined
+                ? null
+                : num(row.unRealizedProfit),
+            unrealizedPnlPercent: null,
+            realizedPnl: null,
+            margin:
+              row.initialMargin === undefined ? null : num(row.initialMargin),
+            openedAt: null,
+            closedAt: null,
+          } satisfies Position;
+        })
+    );
   }
 
   async closePosition(
@@ -646,14 +676,16 @@ export class TabdealAdapter extends BaseExchangeAdapter {
       amount: total,
       filledAmount: executed,
       averagePrice:
-        executed === "0" ? null : num(raw.cummulativeQuoteQty ?? raw.cumulativeQuoteQty),
+        executed === "0"
+          ? null
+          : num(raw.cummulativeQuoteQty ?? raw.cumulativeQuoteQty),
       filledValue: num(raw.cummulativeQuoteQty ?? raw.cumulativeQuoteQty),
       fee: null,
       feeAsset: null,
-      createdAt:
-        Number(raw.transactTime ?? raw.time ?? 0) || Date.now(),
+      createdAt: Number(raw.transactTime ?? raw.time ?? 0) || Date.now(),
       updatedAt:
-        Number(raw.updateTime ?? raw.transactTime ?? raw.time ?? 0) || Date.now(),
+        Number(raw.updateTime ?? raw.transactTime ?? raw.time ?? 0) ||
+        Date.now(),
       note: null,
     };
   }

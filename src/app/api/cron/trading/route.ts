@@ -33,7 +33,10 @@ export async function POST(request: Request) {
   // response. That matters more than usual here: it is a bearer credential.
   const provided = request.headers.get("x-cron-secret") ?? "";
   if (!timingSafeEqual(provided, env.CRON_SECRET)) {
-    return NextResponse.json({ ok: false, error: "unauthorised" }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "unauthorised" },
+      { status: 401 },
+    );
   }
 
   try {

@@ -1,4 +1,9 @@
-import type { CoinRow, CoinSort, CoinSortKey, SortDirection } from "./coin.types";
+import type {
+  CoinRow,
+  CoinSort,
+  CoinSortKey,
+  SortDirection,
+} from "./coin.types";
 
 /**
  * Row ordering, as a pure function.
@@ -67,9 +72,7 @@ export function nextSort(current: CoinSort, key: CoinSortKey): CoinSort | null {
   if (current.key !== key) return { key, direction: initial };
 
   const opposite: SortDirection = current.direction === "asc" ? "desc" : "asc";
-  return current.direction === initial
-    ? { key, direction: opposite }
-    : null;
+  return current.direction === initial ? { key, direction: opposite } : null;
 }
 
 export function sortRows(

@@ -89,7 +89,9 @@ export const tradingRouter = createTRPCRouter({
       mode: env.TRADING_MODE,
       tradingConfigured: hasTradingAccess(undefined),
       requiresSecret: Boolean(env.TRADING_API_SECRET),
-      telegramConfigured: Boolean(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID),
+      telegramConfigured: Boolean(
+        env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID,
+      ),
     };
   }),
 
@@ -225,7 +227,10 @@ export const tradingRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       requireSecret(input.secret);
-      return Orders.trades({ exchange: input.exchange as never, limit: input.limit });
+      return Orders.trades({
+        exchange: input.exchange as never,
+        limit: input.limit,
+      });
     }),
 
   positions: publicProcedure

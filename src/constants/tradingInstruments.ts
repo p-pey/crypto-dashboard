@@ -98,25 +98,78 @@ export type VenueMarket = {
 export const WALLEX_STEP_FROM_DECIMALS = (decimals: string): string =>
   decimals === "0" ? "1" : `0.${"0".repeat(Number(decimals) - 1)}1`;
 
-export const VENUE_MARKETS: Record<string, Partial<Record<string, VenueMarket>>> = {
+export const VENUE_MARKETS: Record<
+  string,
+  Partial<Record<string, VenueMarket>>
+> = {
   // ------------------------------------------------------------------ //
   // Nobitex - the only venue that quotes Rial markets in actual Rial.
   // ------------------------------------------------------------------ //
   nobitex: {
-    usdt: { symbol: "USDTIRT", tickSize: "10", stepSize: "0.01", minNotional: "500000", quoteInToman: false },
-    xaut: { symbol: "XAUTIRT", tickSize: "10", stepSize: "0.00001", minNotional: "500000", quoteInToman: false },
-    paxg: { symbol: "PAXGIRT", tickSize: "10", stepSize: "0.00001", minNotional: "500000", quoteInToman: false },
-    gold18k: { symbol: "", tickSize: "0", stepSize: "0", minNotional: null, quoteInToman: false, unavailable: "No 18k gram market on Nobitex" },
+    usdt: {
+      symbol: "USDTIRT",
+      tickSize: "10",
+      stepSize: "0.01",
+      minNotional: "500000",
+      quoteInToman: false,
+    },
+    xaut: {
+      symbol: "XAUTIRT",
+      tickSize: "10",
+      stepSize: "0.00001",
+      minNotional: "500000",
+      quoteInToman: false,
+    },
+    paxg: {
+      symbol: "PAXGIRT",
+      tickSize: "10",
+      stepSize: "0.00001",
+      minNotional: "500000",
+      quoteInToman: false,
+    },
+    gold18k: {
+      symbol: "",
+      tickSize: "0",
+      stepSize: "0",
+      minNotional: null,
+      quoteInToman: false,
+      unavailable: "No 18k gram market on Nobitex",
+    },
   },
 
   // ------------------------------------------------------------------ //
   // Wallex - quote assets are TMN and USDT only; there is no IRT market.
   // ------------------------------------------------------------------ //
   wallex: {
-    usdt: { symbol: "USDTTMN", tickSize: "1", stepSize: "0.01", minNotional: "50000", quoteInToman: true },
-    xaut: { symbol: "XAUTTMN", tickSize: "1", stepSize: "0.00001", minNotional: "50000", quoteInToman: true },
-    paxg: { symbol: "PAXGTMN", tickSize: "1", stepSize: "0.000001", minNotional: "50000", quoteInToman: true },
-    gold18k: { symbol: "", tickSize: "0", stepSize: "0", minNotional: null, quoteInToman: false, unavailable: "No 18k gram market on Wallex" },
+    usdt: {
+      symbol: "USDTTMN",
+      tickSize: "1",
+      stepSize: "0.01",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    xaut: {
+      symbol: "XAUTTMN",
+      tickSize: "1",
+      stepSize: "0.00001",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    paxg: {
+      symbol: "PAXGTMN",
+      tickSize: "1",
+      stepSize: "0.000001",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    gold18k: {
+      symbol: "",
+      tickSize: "0",
+      stepSize: "0",
+      minNotional: null,
+      quoteInToman: false,
+      unavailable: "No 18k gram market on Wallex",
+    },
   },
 
   // ------------------------------------------------------------------ //
@@ -124,10 +177,35 @@ export const VENUE_MARKETS: Record<string, Partial<Record<string, VenueMarket>>>
   // so the balance layer needs its own alias.
   // ------------------------------------------------------------------ //
   bitpin: {
-    usdt: { symbol: "USDT_IRT", tickSize: "1", stepSize: "0.01", minNotional: null, quoteInToman: true },
-    xaut: { symbol: "XAUT_IRT", tickSize: "1", stepSize: "0.00001", minNotional: null, quoteInToman: true },
-    paxg: { symbol: "PAXG_IRT", tickSize: "1", stepSize: "0.00001", minNotional: null, quoteInToman: true },
-    gold18k: { symbol: "", tickSize: "0", stepSize: "0", minNotional: null, quoteInToman: false, unavailable: "No 18k gram market on Bitpin" },
+    usdt: {
+      symbol: "USDT_IRT",
+      tickSize: "1",
+      stepSize: "0.01",
+      minNotional: null,
+      quoteInToman: true,
+    },
+    xaut: {
+      symbol: "XAUT_IRT",
+      tickSize: "1",
+      stepSize: "0.00001",
+      minNotional: null,
+      quoteInToman: true,
+    },
+    paxg: {
+      symbol: "PAXG_IRT",
+      tickSize: "1",
+      stepSize: "0.00001",
+      minNotional: null,
+      quoteInToman: true,
+    },
+    gold18k: {
+      symbol: "",
+      tickSize: "0",
+      stepSize: "0",
+      minNotional: null,
+      quoteInToman: false,
+      unavailable: "No 18k gram market on Bitpin",
+    },
   },
 
   // ------------------------------------------------------------------ //
@@ -135,18 +213,68 @@ export const VENUE_MARKETS: Record<string, Partial<Record<string, VenueMarket>>>
   // XAUT_USDT and PAXG_USDT on FAPI.
   // ------------------------------------------------------------------ //
   tabdeal: {
-    usdt: { symbol: "USDT_IRT", tickSize: "1", stepSize: "0.01", minNotional: "50000", quoteInToman: true },
-    xaut: { symbol: "XAUT_IRT", tickSize: "1", stepSize: "0.000001", minNotional: "50000", quoteInToman: true },
-    paxg: { symbol: "PAXG_IRT", tickSize: "1", stepSize: "0.00001", minNotional: "50000", quoteInToman: true },
-    gold18k: { symbol: "", tickSize: "0", stepSize: "0", minNotional: null, quoteInToman: false, unavailable: "No 18k gram market on Tabdeal" },
+    usdt: {
+      symbol: "USDT_IRT",
+      tickSize: "1",
+      stepSize: "0.01",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    xaut: {
+      symbol: "XAUT_IRT",
+      tickSize: "1",
+      stepSize: "0.000001",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    paxg: {
+      symbol: "PAXG_IRT",
+      tickSize: "1",
+      stepSize: "0.00001",
+      minNotional: "50000",
+      quoteInToman: true,
+    },
+    gold18k: {
+      symbol: "",
+      tickSize: "0",
+      stepSize: "0",
+      minNotional: null,
+      quoteInToman: false,
+      unavailable: "No 18k gram market on Tabdeal",
+    },
   },
 
   bitunix: {
     // The only venue here quoted in USDT rather than Rial.
-    usdt: { symbol: "USDTUSDT", tickSize: "0.01", stepSize: "0.0001", minNotional: "1", quoteInToman: false },
-    xaut: { symbol: "XAUTUSDT", tickSize: "0.01", stepSize: "0.00001", minNotional: "1", quoteInToman: false },
-    paxg: { symbol: "PAXGUSDT", tickSize: "0.01", stepSize: "0.000001", minNotional: "1", quoteInToman: false },
-    gold18k: { symbol: "", tickSize: "0", stepSize: "0", minNotional: null, quoteInToman: false, unavailable: "BitUnix does not list 18k gram gold" },
+    usdt: {
+      symbol: "USDTUSDT",
+      tickSize: "0.01",
+      stepSize: "0.0001",
+      minNotional: "1",
+      quoteInToman: false,
+    },
+    xaut: {
+      symbol: "XAUTUSDT",
+      tickSize: "0.01",
+      stepSize: "0.00001",
+      minNotional: "1",
+      quoteInToman: false,
+    },
+    paxg: {
+      symbol: "PAXGUSDT",
+      tickSize: "0.01",
+      stepSize: "0.000001",
+      minNotional: "1",
+      quoteInToman: false,
+    },
+    gold18k: {
+      symbol: "",
+      tickSize: "0",
+      stepSize: "0",
+      minNotional: null,
+      quoteInToman: false,
+      unavailable: "BitUnix does not list 18k gram gold",
+    },
   },
 };
 
@@ -160,7 +288,10 @@ export const VENUE_MARKETS: Record<string, Partial<Record<string, VenueMarket>>>
  * Nobitex's margin product covers XAUT/Rial at up to 5x, which is the only way
  * to get leveraged Rial gold.
  */
-export const LEVERAGED_MARKETS: Record<string, Record<string, "margin" | "futures">> = {
+export const LEVERAGED_MARKETS: Record<
+  string,
+  Record<string, "margin" | "futures">
+> = {
   nobitex: {
     xaut: "margin",
     usdt: "margin",
@@ -195,7 +326,10 @@ export function leverageMode(
  * to size an order, which is worse than using a value that has been stable for
  * years. The live endpoint always wins when it answers.
  */
-export const NOBITEX_FALLBACK_PRECISION: Record<string, { amount: string; price: string }> = {
+export const NOBITEX_FALLBACK_PRECISION: Record<
+  string,
+  { amount: string; price: string }
+> = {
   USDTIRT: { amount: "0.01", price: "10" },
   XAUTIRT: { amount: "0.00001", price: "10" },
   PAXGIRT: { amount: "0.00001", price: "10" },

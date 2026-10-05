@@ -20,7 +20,8 @@
  */
 
 /** Venues an order can be routed to. */
-export type ExchangeId = "nobitex" | "wallex" | "bitpin" | "tabdeal" | "bitunix";
+export type ExchangeId =
+  "nobitex" | "wallex" | "bitpin" | "tabdeal" | "bitunix";
 
 export const EXCHANGE_IDS: readonly ExchangeId[] = [
   "nobitex",
@@ -228,7 +229,8 @@ export type ExchangeSession = {
   readonly label: string;
   /** False when no credential is configured, or the credential check failed. */
   readonly ready: boolean;
-  readonly kind: "spot" | "spot+margin" | "spot+futures" | "spot+margin+futures";
+  readonly kind:
+    "spot" | "spot+margin" | "spot+futures" | "spot+margin+futures";
   /** Levers this venue exposes, so the UI can hide what does not exist. */
   readonly supportsMargin: boolean;
   readonly supportsFutures: boolean;

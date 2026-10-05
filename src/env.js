@@ -24,6 +24,15 @@ export const env = createEnv({
     COINMARKETCAP_API_KEY: z.string().optional(),
 
     /**
+     * Etherscan V2 key — one key covers every supported chain.
+     *
+     * Optional. Unset, the token holder panel reports itself unconfigured and
+     * everything else on-chain (Blockscout, Blockchair, mempool.space, Solana
+     * RPC) works without any key at all. See `docs/feature-catalog.md`.
+     */
+    ETHERSCAN_API_KEY: z.string().optional(),
+
+    /**
      * Pin a specific AI provider instead of using the preference order.
      *
      * One of `local`, `gemini`, `groq`, `openrouter`. Unset, the app prefers a
@@ -207,6 +216,7 @@ export const env = createEnv({
     STATUSES_SITE_URL: process.env.STATUSES_SITE_URL,
     CRON_SECRET: process.env.CRON_SECRET,
     COINMARKETCAP_API_KEY: process.env.COINMARKETCAP_API_KEY,
+    ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
     AI_PROVIDER: process.env.AI_PROVIDER,
     LOCAL_LLM_BASE_URL: process.env.LOCAL_LLM_BASE_URL,
     LOCAL_LLM_MODEL: process.env.LOCAL_LLM_MODEL,

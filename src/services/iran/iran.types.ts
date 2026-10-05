@@ -44,7 +44,8 @@ export type IrAssetConfig = {
   /** Short technical label, kept for logs and the URL. */
   label: string;
   /** Dictionary key for the human readable name shown in the UI. */
-  labelKey: "irPrice.assets.usdt" | "irPrice.assets.xaut" | "irPrice.assets.paxg";
+  labelKey:
+    "irPrice.assets.usdt" | "irPrice.assets.xaut" | "irPrice.assets.paxg";
   kind: IrAssetKind;
 };
 

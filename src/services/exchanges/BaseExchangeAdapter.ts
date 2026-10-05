@@ -5,10 +5,7 @@ import {
   type VenueMarket,
 } from "~/constants/tradingInstruments";
 import { INSTRUMENTS } from "~/constants/tradingInstruments";
-import {
-  MIN_SPACING_MS,
-  Pacer,
-} from "~/services/exchanges/http";
+import { MIN_SPACING_MS, Pacer } from "~/services/exchanges/http";
 import {
   ExchangeError,
   type ExchangeAdapter,

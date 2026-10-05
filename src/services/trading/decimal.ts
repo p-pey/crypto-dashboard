@@ -50,7 +50,8 @@ function scaleDown(value: Decimal, n: number): Decimal {
   const divisor = pow10(n);
   const quotient = value.mantissa / divisor;
   const remainder = value.mantissa % divisor;
-  const bump = (remainder < 0n ? -remainder : remainder) * 2n >= divisor ? 1n : 0n;
+  const bump =
+    (remainder < 0n ? -remainder : remainder) * 2n >= divisor ? 1n : 0n;
   const scale = value.scale - n;
   if (scale < 0) {
     return { mantissa: (quotient + bump) * pow10(-scale), scale: 0 };
@@ -126,7 +127,8 @@ export function parseDecimal(
   }
 
   const match = /^([+-]?)(\d*)(?:\.(\d*))?$/.exec(text);
-  if (!match) throw new RangeError(`cannot parse decimal: ${JSON.stringify(input)}`);
+  if (!match)
+    throw new RangeError(`cannot parse decimal: ${JSON.stringify(input)}`);
 
   const sign = match[1];
   const whole = match[2] ?? "";
@@ -265,7 +267,9 @@ export function max(a: Decimal, b: Decimal): Decimal {
 export function toFixedString(value: Decimal, scale = value.scale): string {
   const rounded = roundToScale(value, scale);
   const negative = rounded.mantissa < 0n;
-  const magnitude = (negative ? -rounded.mantissa : rounded.mantissa).toString();
+  const magnitude = (
+    negative ? -rounded.mantissa : rounded.mantissa
+  ).toString();
   const digits = magnitude.padStart(scale + 1, "0");
   const cut = digits.length - scale;
   const whole = digits.slice(0, cut) || "0";
@@ -371,7 +375,10 @@ export function snapToStep(
 
   // `steps` counts multiples of the stride, so the snapped value is the step
   // count multiplied back out, not the count itself.
-  const snapped = { mantissa: (negative ? -steps : steps) * stride, scale: common };
+  const snapped = {
+    mantissa: (negative ? -steps : steps) * stride,
+    scale: common,
+  };
 
   return {
     value: toFixedString(snapped, decimals),
@@ -399,7 +406,9 @@ export function floorToStep(value: Decimal, step: string): Decimal {
 export function wire(value: Decimal, step?: string): string {
   if (!step) return toPlainString(value);
   const snapped = snapToStep(value, step, "nearest");
-  return snapped.exact ? toPlainString(parseDecimal(snapped.value)) : toPlainString(value);
+  return snapped.exact
+    ? toPlainString(parseDecimal(snapped.value))
+    : toPlainString(value);
 }
 
 /**
@@ -418,7 +427,11 @@ export function wire(value: Decimal, step?: string): string {
 export function textOf(value: unknown): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
+  if (
+    typeof value === "number" ||
+    typeof value === "bigint" ||
+    typeof value === "boolean"
+  ) {
     return String(value);
   }
   return "";

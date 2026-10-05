@@ -63,13 +63,22 @@ function unwrapWallex<T>(
   what: string,
 ): T {
   if (typeof payload !== "object" || payload === null) {
-    throw new ExchangeError(exchange, "unavailable", `${what}: unexpected response`);
+    throw new ExchangeError(
+      exchange,
+      "unavailable",
+      `${what}: unexpected response`,
+    );
   }
   const envelope = payload as WallexEnvelope<T>;
-  if (envelope.success === false || (envelope.code !== undefined && envelope.result === undefined)) {
+  if (
+    envelope.success === false ||
+    (envelope.code !== undefined && envelope.result === undefined)
+  ) {
     let detail = envelope.message ?? `code ${String(envelope.code)}`;
     if (typeof envelope.result === "object" && envelope.result !== null) {
-      const first = Object.values(envelope.result as Record<string, unknown>)[0];
+      const first = Object.values(
+        envelope.result as Record<string, unknown>,
+      )[0];
       if (typeof first === "string") detail = first;
     }
     const code = envelope.code === undefined ? null : String(envelope.code);
@@ -100,8 +109,13 @@ function num(value: unknown): string {
  * disallowed characters is stable, which is the property that matters.
  */
 export function wallexClientId(raw: string): string {
-  const cleaned = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, 32);
-  return cleaned.length > 0 ? cleaned : `O${Date.now().toString(36).toUpperCase()}`;
+  const cleaned = raw
+    .replace(/[^A-Z0-9]/gi, "")
+    .toUpperCase()
+    .slice(0, 32);
+  return cleaned.length > 0
+    ? cleaned
+    : `O${Date.now().toString(36).toUpperCase()}`;
 }
 
 type WallexOrder = {
@@ -126,7 +140,11 @@ type WallexOrder = {
  * and not holding a residual size is treated as terminal rather than open, so a
  * venue-side rename cannot leave a phantom resting order forever.
  */
-function orderStatusOf(raw: string | undefined, filled: string, total: string): OrderStatus {
+function orderStatusOf(
+  raw: string | undefined,
+  filled: string,
+  total: string,
+): OrderStatus {
   const f = parseDecimal(filled);
   const t = parseDecimal(total);
   const isFull = t.mantissa > 0n && f.mantissa >= t.mantissa;
@@ -173,7 +191,11 @@ export class WallexAdapter extends BaseExchangeAdapter {
 
   private auth(): Record<string, string> {
     if (!this.apiKey) {
-      throw new ExchangeError(this.id, "unauthorized", "WALLEX_API_KEY is not configured");
+      throw new ExchangeError(
+        this.id,
+        "unauthorized",
+        "WALLEX_API_KEY is not configured",
+      );
     }
     // Note the header name. Wallex also reads an `authorization` header, but
     // that is the web UI's session token and is not a supported API mechanism.
@@ -386,7 +408,10 @@ export class WallexAdapter extends BaseExchangeAdapter {
     return rows.map((raw) => this.toOrder(raw, spec));
   }
 
-  async listTrades(options: { symbol?: string; limit?: number }): Promise<Trade[]> {
+  async listTrades(options: {
+    symbol?: string;
+    limit?: number;
+  }): Promise<Trade[]> {
     const spec = options.symbol ? this.specForSymbol(options.symbol) : null;
     if (!spec) return [];
 
@@ -420,7 +445,9 @@ export class WallexAdapter extends BaseExchangeAdapter {
       value: num(raw.executedSum),
       fee: raw.fee === undefined ? null : num(raw.fee),
       feeAsset: null,
-      tradedAt: Date.parse(String(raw.updated_at ?? raw.created_at ?? "")) || Date.now(),
+      tradedAt:
+        Date.parse(String(raw.updated_at ?? raw.created_at ?? "")) ||
+        Date.now(),
     }));
   }
 
@@ -466,7 +493,8 @@ export class WallexAdapter extends BaseExchangeAdapter {
       feeAsset: null,
       createdAt: epochOf(raw.created_at) ?? Date.now(),
       updatedAt:
-        Date.parse(String(raw.updated_at ?? raw.created_at ?? "")) || Date.now(),
+        Date.parse(String(raw.updated_at ?? raw.created_at ?? "")) ||
+        Date.now(),
       note: null,
     };
   }

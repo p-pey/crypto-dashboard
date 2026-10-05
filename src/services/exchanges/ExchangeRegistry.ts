@@ -67,7 +67,9 @@ class Registry {
    */
   async sessions(): Promise<ExchangeSession[]> {
     const adapters = this.all();
-    const settled = await Promise.all(adapters.map((adapter) => adapter.probe()));
+    const settled = await Promise.all(
+      adapters.map((adapter) => adapter.probe()),
+    );
 
     return settled.map((session) => ({
       ...session,

@@ -3,8 +3,10 @@ import {
   CandlestickChart,
   ChartColumnIncreasing,
   ChartPie,
+  Compass,
   Droplets,
   LineChart,
+  ShieldCheck,
   type LucideIcon,
   Zap,
 } from "lucide-react";
@@ -32,6 +34,8 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "irPrice", href: "/ir-price", icon: Droplets },
   { key: "analyze", href: "/analyze", icon: LineChart },
   { key: "charts", href: "/charts", icon: ChartColumnIncreasing },
+  { key: "insights", href: "/insights", icon: Compass },
+  { key: "safety", href: "/safety", icon: ShieldCheck },
 ];
 
 /** Longest prefix first so `/ir-price` cannot swallow a hypothetical `/ir-price-x`. */

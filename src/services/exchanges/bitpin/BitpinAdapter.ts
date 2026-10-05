@@ -91,7 +91,8 @@ function orderStatusOf(raw: BitpinOrder): OrderStatus {
   const isPartial = filled.mantissa > 0n && !isFull;
   const cancelled = raw.req_to_cancel === true || raw.state === "closed";
 
-  if (cancelled) return isPartial ? "partially_filled" : isFull ? "filled" : "canceled";
+  if (cancelled)
+    return isPartial ? "partially_filled" : isFull ? "filled" : "canceled";
   if (isFull) return "filled";
   if (isPartial) return "partially_filled";
   return "open";
@@ -235,7 +236,9 @@ export class BitpinAdapter extends BaseExchangeAdapter {
     return this.toOrder(payload, spec);
   }
 
-  async cancelOrder(order: Pick<Order, "id" | "symbol" | "clientOrderId">): Promise<void> {
+  async cancelOrder(
+    order: Pick<Order, "id" | "symbol" | "clientOrderId">,
+  ): Promise<void> {
     await this.call({
       method: "DELETE",
       path: `/odr/orders/${encodeURIComponent(order.id)}/`,
@@ -268,7 +271,10 @@ export class BitpinAdapter extends BaseExchangeAdapter {
    * outright. `/odr/order_history/` is the longer record, so it is read for
    * anything past that window.
    */
-  async listOrderHistory(options: { symbol?: string; limit?: number }): Promise<Order[]> {
+  async listOrderHistory(options: {
+    symbol?: string;
+    limit?: number;
+  }): Promise<Order[]> {
     const spec = options.symbol ? this.specForSymbol(options.symbol) : null;
 
     const payload = await this.call<{ results?: BitpinOrder[] }>({
@@ -285,7 +291,10 @@ export class BitpinAdapter extends BaseExchangeAdapter {
     return (payload.results ?? []).map((raw) => this.toOrder(raw, spec));
   }
 
-  async listTrades(options: { symbol?: string; limit?: number }): Promise<Trade[]> {
+  async listTrades(options: {
+    symbol?: string;
+    limit?: number;
+  }): Promise<Trade[]> {
     const spec = options.symbol ? this.specForSymbol(options.symbol) : null;
     if (!spec) return [];
 
@@ -294,7 +303,10 @@ export class BitpinAdapter extends BaseExchangeAdapter {
     }>({
       method: "GET",
       path: "/odr/fills/",
-      query: { symbol: spec.symbol, limit: Math.min(options.limit ?? 100, 100) },
+      query: {
+        symbol: spec.symbol,
+        limit: Math.min(options.limit ?? 100, 100),
+      },
       idempotent: true,
     });
 
@@ -310,7 +322,9 @@ export class BitpinAdapter extends BaseExchangeAdapter {
       value: num(raw.quote_amount),
       fee: raw.commission === undefined ? null : num(raw.commission),
       feeAsset:
-        typeof raw.commission_currency === "string" ? raw.commission_currency : null,
+        typeof raw.commission_currency === "string"
+          ? raw.commission_currency
+          : null,
       tradedAt: epochOf(raw.created_at) ?? Date.now(),
     }));
   }
@@ -343,9 +357,11 @@ export class BitpinAdapter extends BaseExchangeAdapter {
     const average =
       filled === "0" || price === "0"
         ? null
-        : toPlainString(parseDecimal(filled).mantissa === 0n
-            ? parseDecimal("0")
-            : parseDecimal(filled));
+        : toPlainString(
+            parseDecimal(filled).mantissa === 0n
+              ? parseDecimal("0")
+              : parseDecimal(filled),
+          );
 
     return {
       id: textOf(raw.id) || textOf(raw.identifier),
@@ -362,11 +378,15 @@ export class BitpinAdapter extends BaseExchangeAdapter {
       // There is no average field, so it is left null rather than guessed from
       // the limit price, which would read as a real fill price.
       averagePrice: null,
-      filledValue: raw.dealed_quote_amount === undefined ? null : num(raw.dealed_quote_amount),
+      filledValue:
+        raw.dealed_quote_amount === undefined
+          ? null
+          : num(raw.dealed_quote_amount),
       fee: raw.commission === undefined ? null : num(raw.commission),
       feeAsset: null,
       createdAt: epochOf(raw.created_at) ?? Date.now(),
-      updatedAt: epochOf(raw.closed_at) ?? epochOf(raw.created_at) ?? Date.now(),
+      updatedAt:
+        epochOf(raw.closed_at) ?? epochOf(raw.created_at) ?? Date.now(),
       note: null,
       ...(average === null ? {} : { averagePrice: average }),
     };

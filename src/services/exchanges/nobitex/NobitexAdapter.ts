@@ -3,7 +3,11 @@ import "server-only";
 import { env } from "~/env.js";
 import { NOBITEX_FALLBACK_PRECISION } from "~/constants/tradingInstruments";
 import { BaseExchangeAdapter } from "~/services/exchanges/BaseExchangeAdapter";
-import { request, venueCodeOf, venueMessageOf } from "~/services/exchanges/http";
+import {
+  request,
+  venueCodeOf,
+  venueMessageOf,
+} from "~/services/exchanges/http";
 import {
   ExchangeError,
   type ProtectionResult,
@@ -173,16 +177,14 @@ export class NobitexAdapter extends BaseExchangeAdapter {
     return { Authorization: `Token ${this.token}` };
   }
 
-  private call<T>(
-    options: {
-      method: "GET" | "POST" | "DELETE";
-      path: string;
-      query?: Record<string, string | number | boolean | undefined>;
-      body?: unknown;
-      write?: boolean;
-      idempotent?: boolean;
-    },
-  ): Promise<T> {
+  private call<T>(options: {
+    method: "GET" | "POST" | "DELETE";
+    path: string;
+    query?: Record<string, string | number | boolean | undefined>;
+    body?: unknown;
+    write?: boolean;
+    idempotent?: boolean;
+  }): Promise<T> {
     return this.write.schedule(() =>
       this.read.schedule(() =>
         request<T>({
@@ -364,9 +366,7 @@ export class NobitexAdapter extends BaseExchangeAdapter {
       });
   }
 
-  private async placeSpot(
-    request_: PlaceOrderRequest,
-  ): Promise<Order> {
+  private async placeSpot(request_: PlaceOrderRequest): Promise<Order> {
     const spec = this.requireSpec(request_.instrumentId);
     const { src, dst } = currenciesOf(spec);
 
@@ -486,9 +486,7 @@ export class NobitexAdapter extends BaseExchangeAdapter {
       "open orders",
     );
 
-    return (unwrapped.orders ?? []).map((raw) =>
-      this.toOrder(raw, spec, null),
-    );
+    return (unwrapped.orders ?? []).map((raw) => this.toOrder(raw, spec, null));
   }
 
   async listOrderHistory(options: {
@@ -516,9 +514,7 @@ export class NobitexAdapter extends BaseExchangeAdapter {
       "order history",
     );
 
-    return (unwrapped.orders ?? []).map((raw) =>
-      this.toOrder(raw, spec, null),
-    );
+    return (unwrapped.orders ?? []).map((raw) => this.toOrder(raw, spec, null));
   }
 
   async listTrades(options: {
@@ -602,9 +598,7 @@ export class NobitexAdapter extends BaseExchangeAdapter {
         size: num(raw.liability),
         entryPrice: num(raw.entryPrice),
         liquidationPrice:
-          raw.liquidationPrice === undefined
-            ? null
-            : num(raw.liquidationPrice),
+          raw.liquidationPrice === undefined ? null : num(raw.liquidationPrice),
         unrealizedPnl:
           raw.unrealizedPNL === undefined ? null : num(raw.unrealizedPNL),
         unrealizedPnlPercent:
@@ -673,8 +667,7 @@ export class NobitexAdapter extends BaseExchangeAdapter {
       mode: "emulated",
       takeProfit: protection.takeProfit ?? null,
       stopLoss: protection.stopLoss ?? null,
-      note:
-        "Nobitex margin has no exchange-side take-profit or stop-loss. These levels are held by this app and fire a limit reduce order when the price crosses, so they only work while it is running.",
+      note: "Nobitex margin has no exchange-side take-profit or stop-loss. These levels are held by this app and fire a limit reduce order when the price crosses, so they only work while it is running.",
     };
   }
 

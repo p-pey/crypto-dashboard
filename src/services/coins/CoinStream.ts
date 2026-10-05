@@ -45,7 +45,10 @@ export class CoinStream {
    * when the last one leaves, so navigating away actually disconnects instead of
    * leaving a connection and a reconnect timer behind.
    */
-  connect(symbols: string[], onTick: (tick: BinanceTicker) => void): () => void {
+  connect(
+    symbols: string[],
+    onTick: (tick: BinanceTicker) => void,
+  ): () => void {
     this.consumers += 1;
     this.handlers.add(onTick);
 

@@ -10,6 +10,7 @@ import { llmRouter } from "./llm/llm.router";
 import { derivativesRouter } from "./derivatives/derivatives.router";
 import { statusesRouter } from "./statuses/statuses.service";
 import { tradingRouter } from "./trading/trading.router";
+import { insightsRouter } from "./insights/insights.router";
 
 /**
  * This is the primary router for your server.
@@ -28,6 +29,7 @@ export const appRouter = createTRPCRouter({
   derivatives: derivativesRouter,
   statuses: statusesRouter,
   trading: tradingRouter,
+  insights: insightsRouter,
 });
 
 // export type definition of API

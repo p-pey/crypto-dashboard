@@ -37,7 +37,11 @@ export type NavKey =
   | "etfs"
   | "irPrice"
   | "analyze"
-  | "charts";
+  | "charts"
+  /** Free-source insights: rotation, DeFi, DEX, prediction, on-chain, macro. */
+  | "insights"
+  /** Token safety screening, keyed separately because it is a different task. */
+  | "safety";
 
 /** Ant Design status keys reused across the Iranian price widgets. */
 export type IrStatusKey = "live" | "connecting" | "stale" | "error";

@@ -161,7 +161,10 @@ export class TelegramNotifier {
           const outcome = await this.send(
             JSON.parse(row.payload) as { text: string },
           );
-          this.repository.markNotificationSent(row.id, outcome.messageId ?? null);
+          this.repository.markNotificationSent(
+            row.id,
+            outcome.messageId ?? null,
+          );
           delivered += 1;
         } catch (error) {
           const reason = error instanceof Error ? error.message : String(error);

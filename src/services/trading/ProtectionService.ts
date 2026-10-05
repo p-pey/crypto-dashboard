@@ -149,7 +149,9 @@ export class ProtectionService {
    * path: it has to happen with no browser open. Returns how many fired, so the
    * worker can report something an operator can check.
    */
-  async checkArmed(priceOf: (symbol: string) => Promise<number | null>): Promise<number> {
+  async checkArmed(
+    priceOf: (symbol: string) => Promise<number | null>,
+  ): Promise<number> {
     const armed = this.repository.listArmedProtection();
     let fired = 0;
 
@@ -176,7 +178,9 @@ export class ProtectionService {
       fired += 1;
 
       this.notifier.alert(
-        placed ? `${trigger === "take_profit" ? "TAKE PROFIT" : "STOP LOSS"} FIRED` : "PROTECTION FAILED",
+        placed
+          ? `${trigger === "take_profit" ? "TAKE PROFIT" : "STOP LOSS"} FIRED`
+          : "PROTECTION FAILED",
         [
           `${row.symbol} ${row.side.toUpperCase()}`,
           `entry ${row.entryPrice}, last ${toPlainString(parseDecimal(String(price)))}`,
@@ -249,17 +253,15 @@ export function crossed(
 
   if (takeProfit) {
     const level = parseDecimal(takeProfit);
-    const hit = side === "long"
-      ? compare(last, level) >= 0
-      : compare(last, level) <= 0;
+    const hit =
+      side === "long" ? compare(last, level) >= 0 : compare(last, level) <= 0;
     if (hit) return "take_profit";
   }
 
   if (stopLoss) {
     const level = parseDecimal(stopLoss);
-    const hit = side === "long"
-      ? compare(last, level) <= 0
-      : compare(last, level) >= 0;
+    const hit =
+      side === "long" ? compare(last, level) <= 0 : compare(last, level) >= 0;
     if (hit) return "stop_loss";
   }
 

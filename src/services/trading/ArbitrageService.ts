@@ -62,10 +62,7 @@ export const TAKER_FEE: Record<ExchangeId, number> = {
  * here this is dominated by a manual withdrawal rather than a network fee, so
  * it is modelled as a fixed friction instead of a percentage.
  */
-export function transferCostRial(
-  from: ExchangeId,
-  to: ExchangeId,
-): number {
+export function transferCostRial(from: ExchangeId, to: ExchangeId): number {
   if (from === to) return 0;
   // Two Iranian venues means a withdrawal and a deposit, each with its own
   // delay and minimum. A rough allowance is more honest than pretending it is
@@ -121,7 +118,10 @@ export class ArbitrageService {
    * the only honest comparison: buying at the mid and selling at the mid
    * double-counts the spread and invents profit that does not exist.
    */
-  scan(rows: MarketRow[], options: { actionableOnly?: boolean } = {}): ArbitrageOpportunity[] {
+  scan(
+    rows: MarketRow[],
+    options: { actionableOnly?: boolean } = {},
+  ): ArbitrageOpportunity[] {
     const grouped = new Map<string, MarketRow[]>();
     for (const row of rows) {
       if (row.ask === null && row.bid === null) continue;
@@ -153,25 +153,47 @@ export class ArbitrageService {
 
       if (asks.length === 0 || bids.length === 0) continue;
 
-      const cheapest = asks.reduce((a, b) => (compare(b.price, a.price) < 0 ? b : a));
-      const richest = bids.reduce((a, b) => (compare(b.price, a.price) > 0 ? b : a));
+      const cheapest = asks.reduce((a, b) =>
+        compare(b.price, a.price) < 0 ? b : a,
+      );
+      const richest = bids.reduce((a, b) =>
+        compare(b.price, a.price) > 0 ? b : a,
+      );
 
       // Same venue on both sides is not a cross-venue spread.
       if (cheapest.exchange === richest.exchange) continue;
 
-      const gross = divide(subtract(richest.price, cheapest.price), cheapest.price, 6);
+      const gross = divide(
+        subtract(richest.price, cheapest.price),
+        cheapest.price,
+        6,
+      );
       const grossPercent = multiply(gross, parseDecimal(100));
 
       // Both legs pay a taker fee, and moving between venues costs a fixed
       // allowance. Only what survives both is an opportunity.
-      const feeCost = multiply(cheapest.price, parseDecimal(String(
-        TAKER_FEE[cheapest.exchange] + TAKER_FEE[richest.exchange],
-      )));
-      const fixed = parseDecimal(String(transferCostRial(cheapest.exchange, richest.exchange)));
+      const feeCost = multiply(
+        cheapest.price,
+        parseDecimal(
+          String(TAKER_FEE[cheapest.exchange] + TAKER_FEE[richest.exchange]),
+        ),
+      );
+      const fixed = parseDecimal(
+        String(transferCostRial(cheapest.exchange, richest.exchange)),
+      );
 
-      const perUnitCost = add(feeCost, scaleDownForFixed(fixed, cheapest.price));
-      const net = subtract(subtract(richest.price, cheapest.price), perUnitCost);
-      const netPercent = multiply(divide(net, cheapest.price, 6), parseDecimal(100));
+      const perUnitCost = add(
+        feeCost,
+        scaleDownForFixed(fixed, cheapest.price),
+      );
+      const net = subtract(
+        subtract(richest.price, cheapest.price),
+        perUnitCost,
+      );
+      const netPercent = multiply(
+        divide(net, cheapest.price, 6),
+        parseDecimal(100),
+      );
 
       const notional = parseDecimal(String(NOTIONAL_RIAL));
       const netProfit = roundToScale(multiply(net, notional), 0);
@@ -179,9 +201,7 @@ export class ArbitrageService {
       const opportunity: ArbitrageOpportunity = {
         key: `${instrumentId}:${cheapest.exchange}>${richest.exchange}`,
         instrumentId,
-        label:
-          cheapest.row.upstreamName ??
-          instrumentId.toUpperCase(),
+        label: cheapest.row.upstreamName ?? instrumentId.toUpperCase(),
         buy: {
           exchange: cheapest.exchange,
           priceInRial: toPlainString(cheapest.price),
@@ -212,7 +232,10 @@ export class ArbitrageService {
 
     // Most profitable first, which is the order a trader wants to act in.
     return out.sort((a, b) =>
-      compare(parseDecimal(b.netSpreadPercent), parseDecimal(a.netSpreadPercent)),
+      compare(
+        parseDecimal(b.netSpreadPercent),
+        parseDecimal(a.netSpreadPercent),
+      ),
     );
   }
 
@@ -226,7 +249,9 @@ export class ArbitrageService {
     opportunities: ArbitrageOpportunity[],
     cooldownMs = 30 * 60_000,
   ): Promise<number> {
-    const rules = this.repository.listArbitrageRules().filter((rule) => rule.enabled);
+    const rules = this.repository
+      .listArbitrageRules()
+      .filter((rule) => rule.enabled);
     if (rules.length === 0) return 0;
 
     let fired = 0;
@@ -240,7 +265,12 @@ export class ArbitrageService {
       );
 
       if (!match) continue;
-      if (compare(parseDecimal(match.netSpreadPercent), parseDecimal(rule.thresholdPercent)) < 0) {
+      if (
+        compare(
+          parseDecimal(match.netSpreadPercent),
+          parseDecimal(rule.thresholdPercent),
+        ) < 0
+      ) {
         continue;
       }
 
@@ -266,7 +296,10 @@ export class ArbitrageService {
   }
 }
 
-function add(a: ReturnType<typeof parseDecimal>, b: ReturnType<typeof parseDecimal>) {
+function add(
+  a: ReturnType<typeof parseDecimal>,
+  b: ReturnType<typeof parseDecimal>,
+) {
   const scale = Math.max(a.scale, b.scale);
   return {
     mantissa:

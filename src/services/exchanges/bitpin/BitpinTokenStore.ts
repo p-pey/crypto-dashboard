@@ -66,7 +66,9 @@ function jwtExpiry(token: string): number | null {
   }
 }
 
-function readToken(payload: unknown): { access: string; refresh: string | null } | null {
+function readToken(
+  payload: unknown,
+): { access: string; refresh: string | null } | null {
   if (typeof payload !== "object" || payload === null) return null;
   const bag = payload as Record<string, unknown>;
   for (const container of [bag, bag.data, bag.result]) {
@@ -78,7 +80,8 @@ function readToken(payload: unknown): { access: string; refresh: string | null }
       const refresh = row.refresh_token ?? row.refreshToken ?? row.refresh;
       return {
         access,
-        refresh: typeof refresh === "string" && refresh.length > 0 ? refresh : null,
+        refresh:
+          typeof refresh === "string" && refresh.length > 0 ? refresh : null,
       };
     }
   }
@@ -111,7 +114,11 @@ export class BitpinTokenStore {
   async accessToken(): Promise<string> {
     const credentials = this.credentials;
     if (!credentials) {
-      throw new ExchangeError("bitpin", "unauthorized", "Bitpin credentials are not configured");
+      throw new ExchangeError(
+        "bitpin",
+        "unauthorized",
+        "Bitpin credentials are not configured",
+      );
     }
 
     const now = Date.now();
@@ -136,9 +143,7 @@ export class BitpinTokenStore {
     key: string;
     secret: string;
   }): Promise<TokenBundle> {
-    const bodies = this.workingBody
-      ? [this.workingBody]
-      : AUTH_BODY_CANDIDATES;
+    const bodies = this.workingBody ? [this.workingBody] : AUTH_BODY_CANDIDATES;
 
     let lastError: ExchangeError | null = null;
 
@@ -173,9 +178,16 @@ export class BitpinTokenStore {
         lastError =
           error instanceof ExchangeError
             ? error
-            : new ExchangeError("bitpin", "unauthorized", "Bitpin authenticate failed", null, null, {
-                cause: error,
-              });
+            : new ExchangeError(
+                "bitpin",
+                "unauthorized",
+                "Bitpin authenticate failed",
+                null,
+                null,
+                {
+                  cause: error,
+                },
+              );
         // A body spelling that produces 400 is wrong; keep trying the others.
         if (lastError.kind === "invalid_request") continue;
         break;

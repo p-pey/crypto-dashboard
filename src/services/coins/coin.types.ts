@@ -98,11 +98,7 @@ export type CoinRow = CoinFundamentals &
   };
 
 export type CoinSortKey =
-  | "rank"
-  | "price"
-  | "marketCap"
-  | "volume24h"
-  | "changePercent";
+  "rank" | "price" | "marketCap" | "volume24h" | "changePercent";
 
 export type SortDirection = "asc" | "desc";
 

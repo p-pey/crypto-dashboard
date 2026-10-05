@@ -82,7 +82,8 @@ function classifyStatus(status: number): ExchangeErrorKind {
   if (status === 401) return "unauthorized";
   if (status === 403) return "forbidden";
   if (status === 429) return "rate_limited";
-  if (status === 400 || status === 404 || status === 422) return "invalid_request";
+  if (status === 400 || status === 404 || status === 422)
+    return "invalid_request";
   if (status >= 500) return "unavailable";
   return "unknown";
 }
@@ -146,7 +147,8 @@ export async function request<T>(req: HttpRequest): Promise<T> {
   const url = resolveUrl(req);
   const idempotent = req.idempotent !== false;
   const budget = idempotent ? (req.retries ?? 2) : 0;
-  const serialized = req.body === undefined ? undefined : stringifyBody(req.body);
+  const serialized =
+    req.body === undefined ? undefined : stringifyBody(req.body);
 
   let attempt = 0;
   for (;;) {
@@ -172,11 +174,12 @@ export async function request<T>(req: HttpRequest): Promise<T> {
       return response.data;
     } catch (error) {
       const status =
-        (error as { response?: { status?: number } } | null)?.response?.status ??
-        undefined;
-      const payload = (error as { response?: { data?: unknown } } | null)?.response
-        ?.data;
-      const kind = status === undefined ? "unavailable" : classifyStatus(status);
+        (error as { response?: { status?: number } } | null)?.response
+          ?.status ?? undefined;
+      const payload = (error as { response?: { data?: unknown } } | null)
+        ?.response?.data;
+      const kind =
+        status === undefined ? "unavailable" : classifyStatus(status);
 
       const failure = new ExchangeError(
         req.exchange,
@@ -191,7 +194,9 @@ export async function request<T>(req: HttpRequest): Promise<T> {
       attempt += 1;
       // 400ms, 1.2s. Long enough that a venue's geo-block or a transient 503 is
       // not hammered, short enough that an order attempt stays interactive.
-      await new Promise((resolve) => setTimeout(resolve, 400 * 3 ** (attempt - 1)));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 400 * 3 ** (attempt - 1)),
+      );
     }
   }
 }
@@ -204,7 +209,10 @@ export async function request<T>(req: HttpRequest): Promise<T> {
  * all, so the only safe assumption is to be slow. Public market metadata is on
  * a much longer interval than anything transactional.
  */
-export const MIN_SPACING_MS: Record<ExchangeId, { read: number; write: number }> = {
+export const MIN_SPACING_MS: Record<
+  ExchangeId,
+  { read: number; write: number }
+> = {
   nobitex: { read: 350, write: 400 },
   wallex: { read: 500, write: 900 },
   bitpin: { read: 750, write: 900 },

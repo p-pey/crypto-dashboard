@@ -138,9 +138,16 @@ export class OrderService {
       spec.tickSize,
       input.side === "buy" ? "down" : "up",
     );
-    const amount = snapToStep(parseDecimal(input.amount), spec.stepSize, "down");
+    const amount = snapToStep(
+      parseDecimal(input.amount),
+      spec.stepSize,
+      "down",
+    );
 
-    const notional = multiply(parseDecimal(snapped.value), parseDecimal(amount.value));
+    const notional = multiply(
+      parseDecimal(snapped.value),
+      parseDecimal(amount.value),
+    );
     const notionalInRial = venueToRial(notional, spec);
 
     return {
@@ -263,9 +270,7 @@ export class OrderService {
 
   /** Pending orders from every configured venue, venue by venue. */
   async openOrders(): Promise<Order[]> {
-    const targets = this.live
-      ? exchangeRegistry().all()
-      : [null];
+    const targets = this.live ? exchangeRegistry().all() : [null];
 
     const results = await Promise.all(
       targets.map(async (adapter) => {
@@ -282,18 +287,27 @@ export class OrderService {
     return results.flat().sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  async orderHistory(options: { exchange?: ExchangeId; limit?: number } = {}): Promise<Order[]> {
+  async orderHistory(
+    options: { exchange?: ExchangeId; limit?: number } = {},
+  ): Promise<Order[]> {
     if (this.live && options.exchange) {
-      return exchangeRegistry().get(options.exchange).listOrderHistory({
-        limit: options.limit ?? 100,
-      });
+      return exchangeRegistry()
+        .get(options.exchange)
+        .listOrderHistory({
+          limit: options.limit ?? 100,
+        });
     }
-    return this.paper.listOrderHistory(options.exchange ?? this.onlyExchange(), {
-      limit: options.limit,
-    });
+    return this.paper.listOrderHistory(
+      options.exchange ?? this.onlyExchange(),
+      {
+        limit: options.limit,
+      },
+    );
   }
 
-  async trades(options: { exchange?: ExchangeId; limit?: number } = {}): Promise<Trade[]> {
+  async trades(
+    options: { exchange?: ExchangeId; limit?: number } = {},
+  ): Promise<Trade[]> {
     if (this.live && options.exchange) {
       return exchangeRegistry()
         .get(options.exchange)
@@ -306,13 +320,15 @@ export class OrderService {
     if (!this.live) return this.paper.getBalances(this.onlyExchange());
 
     const perVenue = await Promise.all(
-      exchangeRegistry().all().map(async (adapter) => {
-        try {
-          return await adapter.getBalances();
-        } catch {
-          return [];
-        }
-      }),
+      exchangeRegistry()
+        .all()
+        .map(async (adapter) => {
+          try {
+            return await adapter.getBalances();
+          } catch {
+            return [];
+          }
+        }),
     );
     return perVenue.flat();
   }
@@ -321,26 +337,30 @@ export class OrderService {
     if (!this.live) return [];
 
     const perVenue = await Promise.all(
-      exchangeRegistry().all().map(async (adapter) => {
-        try {
-          return await adapter.listPositions();
-        } catch {
-          return [];
-        }
-      }),
+      exchangeRegistry()
+        .all()
+        .map(async (adapter) => {
+          try {
+            return await adapter.listPositions();
+          } catch {
+            return [];
+          }
+        }),
     );
     return perVenue.flat();
   }
 
   async markets(): Promise<MarketSpec[]> {
     const perVenue = await Promise.all(
-      exchangeRegistry().all().map(async (adapter) => {
-        try {
-          return await adapter.listMarkets("spot");
-        } catch {
-          return [];
-        }
-      }),
+      exchangeRegistry()
+        .all()
+        .map(async (adapter) => {
+          try {
+            return await adapter.listMarkets("spot");
+          } catch {
+            return [];
+          }
+        }),
     );
     return perVenue.flat();
   }

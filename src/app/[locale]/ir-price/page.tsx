@@ -189,7 +189,13 @@ export default function IrPricePage() {
    * could disagree with what the operator is looking at.
    */
   const boardRows: MarketRow[] = useMemo(
-    () => buildMarketBoard({ tickers, boards: boards?.boards ?? [], nerkh, locale }),
+    () =>
+      buildMarketBoard({
+        tickers,
+        boards: boards?.boards ?? [],
+        nerkh,
+        locale,
+      }),
     [boards, locale, nerkh, tickers],
   );
 
@@ -281,7 +287,11 @@ export default function IrPricePage() {
           The account and spread panels reuse the rows already assembled for the
           board, so neither adds a request against a rate-limited venue.
         */}
-        <AccountPanel secret={secret} hasSecret={hasSecret} onSecret={setSecret} />
+        <AccountPanel
+          secret={secret}
+          hasSecret={hasSecret}
+          onSecret={setSecret}
+        />
 
         <ArbitragePanel
           rows={boardRows}
