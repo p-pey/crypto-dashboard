@@ -171,11 +171,16 @@ export class ArbitrageService {
       const grossPercent = multiply(gross, parseDecimal(100));
 
       // Both legs pay a taker fee, and moving between venues costs a fixed
-      // allowance. Only what survives both is an opportunity.
+      // allowance. Only what survives both is an opportunity. Aggregator rows
+      // (nerkh.io, TGJU) have no executable venue and therefore no fee
+      // schedule; they compare at zero fee rather than crashing the scan.
       const feeCost = multiply(
         cheapest.price,
         parseDecimal(
-          String(TAKER_FEE[cheapest.exchange] + TAKER_FEE[richest.exchange]),
+          String(
+            (TAKER_FEE[cheapest.exchange] ?? 0) +
+              (TAKER_FEE[richest.exchange] ?? 0),
+          ),
         ),
       );
       const fixed = parseDecimal(

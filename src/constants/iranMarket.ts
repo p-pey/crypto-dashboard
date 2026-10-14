@@ -9,7 +9,7 @@ import type { IrExchangeId } from "~/services/iran/iran.types";
  * UI needs in order to label, colour and filter whatever those crawls return.
  */
 
-export type MarketSourceId = IrExchangeId | "nerkh";
+export type MarketSourceId = IrExchangeId | "nerkh" | "tgju";
 
 /** How a source publishes its prices. */
 export type MarketSourceKind = "exchange" | "aggregator";
@@ -85,6 +85,17 @@ export const MARKET_SOURCES: MarketSourceMeta[] = [
     kind: "aggregator",
     transport: "poll",
     // No websocket: nerkh.io is crawled on a timer.
+    wide: true,
+  },
+  {
+    id: "tgju",
+    label: "TGJU",
+    color: "#f472b6",
+    website: "https://www.tgju.org",
+    kind: "aggregator",
+    transport: "poll",
+    // No websocket: tgju.org boards are scraped on a timer. Carries the
+    // reference quotes plus every Iranian exchange's USDT line.
     wide: true,
   },
 ];

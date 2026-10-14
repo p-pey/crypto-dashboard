@@ -5,6 +5,7 @@ import { EtfRouter } from "./etf/etf.router";
 import { iranRouter } from "./iran/iran.router";
 import { candlesRouter } from "./candles/candles.router";
 import { nerkhRouter } from "./nerkh/nerkh.router";
+import { tgjuRouter } from "./tgju/tgju.router";
 import { macroRouter } from "./macro/macro.router";
 import { llmRouter } from "./llm/llm.router";
 import { derivativesRouter } from "./derivatives/derivatives.router";
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   iran: iranRouter,
   candles: candlesRouter,
   nerkh: nerkhRouter,
+  tgju: tgjuRouter,
   macro: macroRouter,
   llm: llmRouter,
   derivatives: derivativesRouter,

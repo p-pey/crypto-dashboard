@@ -17,6 +17,11 @@ import {
   type NerkhQuote,
   type NerkhSnapshot,
 } from "~/services/nerkh/nerkh.types";
+import type {
+  TgjuExchangeRow,
+  TgjuQuote,
+  TgjuSnapshot,
+} from "~/services/tgju/tgju.types";
 
 /**
  * The only stablecoin the board carries.
@@ -131,25 +136,49 @@ const ASSET_LABEL_KEYS: Record<IrTicker["asset"], TranslationKey> = {
 /**
  * The instruments this board shows.
  *
- * The operator asked for a short, deliberate list rather than every market the
- * exchanges carry: Tether, the two tokenised golds, and physical 18k gram gold
- * as the reference rate. Everything else - the other 1,300+ markets on Wallex,
- * the coins nerkh.io lists, the fiat row - is dropped here.
+ * The operator asked for a short, deliberate list: Tether, the US dollar,
+ * 18k and 24k gram gold, and the three coin issues (full, half, quarter).
+ * Tokenised gold (XAUT/PAXG) and every other crypto are deliberately not
+ * shown, even though the deep feed still tracks them for the trading worker.
  *
  * The allowlist is on **base asset**, not on symbol, for the reason the
  * stablecoin check below already documents: `PAXGUSDT` is a PAXG market that
  * happens to end in `USDT`, and a substring test would file it under Tether.
  */
-const TRACKED_BASE_ASSETS = new Set(["USDT", "XAUT", "PAXG"]);
+const TRACKED_BASE_ASSETS = new Set(["USDT"]);
 
 /**
  * nerkh.io instrument ids that belong on the board.
  *
- * `GOLD18K` is the 18k gram reference. It is shown, and it is deliberately not
- * tradeable: no Iranian venue lists a physical gram market, so a buy button on
- * it would have nowhere to send the order.
+ * The seven reference rates: Tether and dollar, 18k/24k gram gold, and the
+ * full/half/quarter coins. Reference-only rows: no Iranian venue lists a
+ * physical gram or coin market, so they carry no order buttons.
  */
-const TRACKED_NERKH_KEYS = new Set(["USDT", "GOLD18K"]);
+const TRACKED_NERKH_KEYS = new Set([
+  "USDT",
+  "USD",
+  "GOLD18K",
+  "GOLD24K",
+  "SEKE_EMAMI",
+  "SEKE_NIM",
+  "SEKE_ROB",
+]);
+
+/**
+ * TGJU instrument ids that belong on the board.
+ *
+ * Same seven references as nerkh.io, so each instrument is quoted by two
+ * independent aggregators and the board survives either one going down.
+ */
+const TRACKED_TGJU_KEYS = new Set([
+  "USDT",
+  "USD",
+  "GOLD18K",
+  "GOLD24K",
+  "SEKE_EMAMI",
+  "SEKE_NIM",
+  "SEKE_ROB",
+]);
 
 function tickerToRow(ticker: IrTicker): MarketRow {
   return {
@@ -261,10 +290,76 @@ function nerkhToRow(quote: NerkhQuote, fetchedAt: number): MarketRow {
   };
 }
 
+/** TGJU reference quote -> board row. TGJU already quotes in Rial. */
+function tgjuToRow(quote: TgjuQuote, fetchedAt: number): MarketRow {
+  const mid = quote.price;
+  return {
+    key: `tgju:${quote.key}`,
+    source: "tgju",
+    assetId: quote.key,
+    baseAsset: quote.key,
+    category: categoriseBaseAsset(quote.key),
+    labelKey: NERKH_LABEL_KEYS[quote.key] ?? "irPrice.assets.other",
+    upstreamName: null,
+    symbol: quote.key,
+    bid: quote.low,
+    ask: quote.high,
+    mid,
+    spark: [],
+    changePercent: quote.changePercent,
+    changeWindowHours: quote.changePercent === null ? null : 24,
+    live: false,
+    status: "live",
+    error: null,
+    updatedAt: quote.updatedLabel ? fetchedAt : null,
+  };
+}
+
+/**
+ * One TGJU `markets-local` exchange line -> board row.
+ *
+ * Every line is a USDT market from a real Iranian exchange, so the board ends
+ * up with one USDT row per venue the same way the deep feed has — except
+ * these cover the ~60 venues TGJU tracks rather than just the four with a
+ * websocket. Reference-only: there is no order path for these venues.
+ */
+function tgjuExchangeToRow(
+  exchange: TgjuExchangeRow,
+  index: number,
+  fetchedAt: number,
+): MarketRow {
+  const mid =
+    exchange.sell !== null && exchange.buy !== null
+      ? (exchange.sell + exchange.buy) / 2
+      : (exchange.sell ?? exchange.buy);
+
+  return {
+    key: `tgju:exchange:${exchange.exchangeSlug}:${index}`,
+    source: "tgju",
+    assetId: "usdt",
+    baseAsset: "USDT",
+    category: "stablecoin",
+    labelKey: "nerkh.instruments.USDT",
+    upstreamName: exchange.exchangeFa,
+    symbol: exchange.pair,
+    bid: exchange.buy,
+    ask: exchange.sell,
+    mid,
+    spark: [],
+    changePercent: exchange.changePercent,
+    changeWindowHours: exchange.changePercent === null ? null : 24,
+    live: false,
+    status: mid === null ? "error" : "live",
+    error: mid === null ? "no market data" : null,
+    updatedAt: exchange.updatedLabel ? fetchedAt : null,
+  };
+}
+
 export type MarketBoardInput = {
   tickers: IrTicker[];
   boards: ExchangeBoard[];
   nerkh: NerkhSnapshot | undefined;
+  tgju: TgjuSnapshot | undefined;
   locale: string;
 };
 
@@ -274,7 +369,7 @@ export type MarketBoardInput = {
  * snapshot copy of USDT or GOLD18K is dropped rather than shown twice.
  */
 export function buildMarketBoard(input: MarketBoardInput): MarketRow[] {
-  const { tickers, boards, nerkh, locale } = input;
+  const { tickers, boards, nerkh, tgju, locale } = input;
 
   const deep = tickers.map(tickerToRow);
   const claimed = new Set(deep.map((row) => `${row.source}:${row.assetId}`));
@@ -299,15 +394,23 @@ export function buildMarketBoard(input: MarketBoardInput): MarketRow[] {
     }
   }
 
+  if (tgju) {
+    for (const quote of tgju.quotes) {
+      rows.push(tgjuToRow(quote, tgju.fetchedAt));
+    }
+    tgju.exchanges.forEach((exchange, index) => {
+      rows.push(tgjuExchangeToRow(exchange, index, tgju.fetchedAt));
+    });
+  }
+
   return sortBoard(rows.filter(isIncluded));
 }
 
 /**
  * The board's allowlist.
  *
- * Exchange rows are matched on `baseAsset` and nerkh rows on their instrument
- * id, because the two feeds name the same instrument differently: an exchange
- * row says `XAUT` while a nerkh row says `GOLD18K`.
+ * Exchange rows are matched on `baseAsset` and aggregator rows on their
+ * instrument id, because the feeds name the same instrument differently.
  *
  * Matching on the base asset rather than the symbol is what keeps `PAXGUSDT`
  * filed as gold rather than being mistaken for a Tether market.
@@ -315,6 +418,9 @@ export function buildMarketBoard(input: MarketBoardInput): MarketRow[] {
 function isIncluded(row: MarketRow): boolean {
   if (row.source === "nerkh") {
     return TRACKED_NERKH_KEYS.has(row.baseAsset.toUpperCase());
+  }
+  if (row.source === "tgju") {
+    return TRACKED_TGJU_KEYS.has(row.baseAsset.toUpperCase());
   }
   return TRACKED_BASE_ASSETS.has(row.baseAsset.toUpperCase());
 }
@@ -326,6 +432,7 @@ const SOURCE_ORDER: MarketSourceId[] = [
   "bitpin",
   "tabdeal",
   "nerkh",
+  "tgju",
 ];
 
 /**

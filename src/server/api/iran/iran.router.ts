@@ -5,6 +5,7 @@ import { AxiosService } from "~/lib/axios";
 import { AppContainer } from "~/lib/container";
 import { IrPriceMapper } from "~/services/iran/iran.mapper";
 import NerkhCrawlerService from "~/services/nerkh/NerkhCrawlerService";
+import TgjuCrawlerService from "~/services/tgju/TgjuCrawlerService";
 import WallexBoardService from "~/services/iran/WallexBoardService";
 import type {
   IrAssetConfig,
@@ -18,6 +19,7 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 const ApiService = AppContainer.resolve(AxiosService);
 const WallexBoard = AppContainer.resolve(WallexBoardService);
 const NerkhCrawler = AppContainer.resolve(NerkhCrawlerService);
+const TgjuCrawler = AppContainer.resolve(TgjuCrawlerService);
 
 const BROWSER_HEADERS = {
   Accept: "application/json, text/plain, */*",
@@ -176,11 +178,12 @@ export const iranRouter = createTRPCRouter({
    * receive numbers older than the ones already on screen.
    */
   refreshPolled: publicProcedure.mutation(async () => {
-    const [board, snapshot] = await Promise.all([
+    const [board, snapshot, tgju] = await Promise.all([
       WallexBoard.getBoard({ force: true }),
       NerkhCrawler.getSnapshot({ force: true }),
+      TgjuCrawler.getSnapshot({ force: true }),
     ]);
 
-    return { boards: [board], snapshot, fetchedAt: Date.now() };
+    return { boards: [board], snapshot, tgju, fetchedAt: Date.now() };
   }),
 });

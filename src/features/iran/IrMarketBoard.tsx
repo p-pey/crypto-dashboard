@@ -25,6 +25,7 @@ import type {
 } from "~/services/iran/iran.market.types";
 import type { IrTicker } from "~/services/iran/iran.types";
 import type { NerkhSnapshot } from "~/services/nerkh/nerkh.types";
+import type { TgjuSnapshot } from "~/services/tgju/tgju.types";
 import MarketList from "./MarketList";
 import {
   buildComparison,
@@ -42,6 +43,7 @@ type Props = {
   tickers: IrTicker[];
   boards: ExchangeBoard[];
   nerkh: NerkhSnapshot | undefined;
+  tgju: TgjuSnapshot | undefined;
   loading: boolean;
   unit: QuoteUnit;
   onUnit: (unit: QuoteUnit) => void;
@@ -63,14 +65,15 @@ type View = "board" | "compare";
 /**
  * The unified Iranian price board.
  *
- * Exchange order books, Wallex's full Toman market list and the nerkh.io rate
- * feed are merged into one row set, so the same screen answers "what is gold
+ * Exchange order books, Wallex's full Toman market list and the nerkh.io and
+ * TGJU rate feeds are merged into one row set, so the same screen answers "what is gold
  * trading at" and "who is quoting it cheapest" without a page change.
  */
 export default function IrMarketBoard({
   tickers,
   boards,
   nerkh,
+  tgju,
   loading,
   unit,
   onUnit,
@@ -86,8 +89,8 @@ export default function IrMarketBoard({
   const [query, setQuery] = useState("");
 
   const allRows = useMemo(
-    () => buildMarketBoard({ tickers, boards, nerkh, locale }),
-    [boards, locale, nerkh, tickers],
+    () => buildMarketBoard({ tickers, boards, nerkh, tgju, locale }),
+    [boards, locale, nerkh, tgju, tickers],
   );
 
   // One price per row per snapshot; the hook turns that into a 1h series.

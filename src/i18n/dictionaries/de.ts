@@ -544,7 +544,7 @@ const de: Dictionary = {
   irPrice: {
     title: "Iranische Preistafel",
     description:
-      "Alle iranischen Börsen und Kursquellen auf einem Board: Orderbücher von Nobitex, Wallex, Bitpin und Tabdeal, live über deren eigene WebSockets, Wallex' vollständige Toman-Marktliste sowie die Gold-, Münz-, Währungs- und Kryptokurse von nerkh.io. Nach Quelle filtern, nach Kategorie gruppieren und zwischen Rial und Toman wechseln.",
+      "Alle iranischen Börsen und Kursquellen auf einem Board: Tether-Orderbücher von Nobitex, Wallex, Bitpin und Tabdeal, live über deren eigene WebSockets, Wallex' vollständige Toman-Marktliste sowie die sieben Referenzkurse (Tether, Dollar, 18/24-kt-Gold, volle/halbe/viertel Münze) von nerkh.io und TGJU samt allen iranischen Tether-Börsenkursen. Nach Quelle filtern, nach Kategorie gruppieren, Preise in Toman.",
     lastUpdate: "letzte Aktualisierung",
     websocketLive: "WebSocket live",
     restOnly: "nur REST-Aktualisierung",
@@ -557,6 +557,9 @@ const de: Dictionary = {
     nerkhErrorTitle: "Nerkh.io-Kurse konnten nicht geladen werden",
     nerkhError:
       "Der Nerkh.io-Live-Endpunkt hat nicht geantwortet, seine Zeilen fehlen daher im Board.",
+    tgjuErrorTitle: "TGJU-Kurse konnten nicht geladen werden",
+    tgjuError:
+      "Die tgju.org-Tafeln haben nicht geantwortet, ihre Zeilen fehlen daher im Board.",
     empty: "Keine Quelle hat Preise zurückgegeben.",
     noMatch:
       "Kein Instrument passt zu den aktuellen Quellen- und Kategoriefiltern.",
@@ -564,7 +567,7 @@ const de: Dictionary = {
       "Alle Preise werden in %s angezeigt. Jede Quelle rechnet in ihrer eigenen Einheit und wird vor der Anzeige vereinheitlicht.",
     poll: {
       cadence: "alle 60 s abgerufen",
-      hint: "Nobitex, Wallex, Bitpin und Tabdeal senden ihre Orderbücher über ein WebSocket, ihre Preise sind also bereits aktuell. nerkh.io und die Wallex-Marktliste haben keinen Stream und werden alle 60 Sekunden abgerufen; nur diese Quellen werden über die Aktualisieren-Schaltfläche neu abgerufen.",
+      hint: "Nobitex, Wallex, Bitpin und Tabdeal senden ihre Orderbücher über ein WebSocket, ihre Preise sind also bereits aktuell. nerkh.io, TGJU und die Wallex-Marktliste haben keinen Stream und werden alle 60 Sekunden abgerufen; nur diese Quellen werden über die Aktualisieren-Schaltfläche neu abgerufen.",
     },
     sourceTag: {
       aggregator: "Kurs",
@@ -704,6 +707,11 @@ const de: Dictionary = {
       DOT: "Polkadot",
       DASH: "Dash",
     },
+  },
+
+  tgju: {
+    staleWarning:
+      "Zwischengespeicherter Stand — tgju.org hat beim letzten Versuch nicht geantwortet.",
   },
 
   analyze: {
@@ -1231,7 +1239,8 @@ const de: Dictionary = {
     fxTitle: "Wechselkurse",
     fxHint: "Referenzkurse der EZB, pro 1 USD.",
     inflationTitle: "Inflation",
-    inflationHint: "Verbraucherpreisindex der Weltbank, zuletzt veröffentlichtes Jahr.",
+    inflationHint:
+      "Verbraucherpreisindex der Weltbank, zuletzt veröffentlichtes Jahr.",
     eurWeek: "EUR Woche",
     latest: "Aktuell",
     year: "Jahr",

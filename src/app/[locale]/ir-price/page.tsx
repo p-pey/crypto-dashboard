@@ -34,7 +34,7 @@ const POLL_INTERVAL_MS = 60_000;
 export default function IrPricePage() {
   const { locale, t } = useI18n();
   const [tickers, setTickers] = useState<IrTicker[]>([]);
-  const [unit, setUnit] = useState<QuoteUnit>("rial");
+  const [unit, setUnit] = useState<QuoteUnit>("toman");
   const [ticket, setTicket] = useState<
     (TradeIntent & { venue: ExchangeId }) | null
   >(null);
@@ -121,6 +121,23 @@ export default function IrPricePage() {
     staleTime: 30_000,
   });
 
+  /**
+   * TGJU's boards: the reference quotes plus every Iranian exchange's USDT
+   * line. Crawled. This is the board's automatic failover partner for
+   * nerkh.io — each of the seven instruments is quoted by both, so when one
+   * crawl fails the other's rows keep the board populated.
+   */
+  const {
+    data: tgju,
+    isError: tgjuError,
+    error: tgjuErr,
+    dataUpdatedAt: tgjuUpdatedAt,
+  } = api.tgju.getSnapshot.useQuery(undefined, {
+    refetchInterval: POLL_INTERVAL_MS,
+    refetchOnWindowFocus: true,
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
     const unsubscribe = IrSocket.subscribe((next) => setTickers(next));
 
@@ -167,6 +184,7 @@ export default function IrPricePage() {
     const fresh = await refreshPolled.mutateAsync();
     utils.iran.getBoards.setData(undefined, { boards: fresh.boards });
     utils.nerkh.getSnapshot.setData(undefined, fresh.snapshot);
+    utils.tgju.getSnapshot.setData(undefined, fresh.tgju);
   }, [refreshPolled, utils]);
 
   /**
@@ -175,11 +193,16 @@ export default function IrPricePage() {
    * than any single query's timestamp.
    */
   const lastUpdated = useMemo(() => {
-    const stamps = [dataUpdatedAt, boardsUpdatedAt, nerkhUpdatedAt].filter(
+    const stamps = [
+      dataUpdatedAt,
+      boardsUpdatedAt,
+      nerkhUpdatedAt,
+      tgjuUpdatedAt,
+    ].filter(
       (value): value is number => typeof value === "number" && value > 0,
     );
     return stamps.length > 0 ? Math.max(...stamps) : null;
-  }, [boardsUpdatedAt, dataUpdatedAt, nerkhUpdatedAt]);
+  }, [boardsUpdatedAt, dataUpdatedAt, nerkhUpdatedAt, tgjuUpdatedAt]);
 
   /**
    * The same row set the board renders.
@@ -194,9 +217,10 @@ export default function IrPricePage() {
         tickers,
         boards: boards?.boards ?? [],
         nerkh,
+        tgju,
         locale,
       }),
-    [boards, locale, nerkh, tickers],
+    [boards, locale, nerkh, tgju, tickers],
   );
 
   const alerts = useMemo(() => {
@@ -237,9 +261,36 @@ export default function IrPricePage() {
         description: nerkh.error ?? "",
       });
     }
+    if (tgjuError) {
+      list.push({
+        key: "tgju",
+        message: t("irPrice.tgjuErrorTitle"),
+        description:
+          tgjuErr instanceof Error ? tgjuErr.message : t("irPrice.tgjuError"),
+      });
+    }
+    if (tgju?.stale) {
+      list.push({
+        key: "tgju-stale",
+        message: t("tgju.staleWarning"),
+        description: tgju.error ?? "",
+      });
+    }
 
     return list;
-  }, [boardsError, boardsErr, error, isError, nerkh, nerkhError, nerkhErr, t]);
+  }, [
+    boardsError,
+    boardsErr,
+    error,
+    isError,
+    nerkh,
+    nerkhError,
+    nerkhErr,
+    t,
+    tgju,
+    tgjuError,
+    tgjuErr,
+  ]);
 
   return (
     <motion.div
@@ -274,6 +325,7 @@ export default function IrPricePage() {
           tickers={tickers}
           boards={boards?.boards ?? []}
           nerkh={nerkh}
+          tgju={tgju}
           loading={isLoading}
           unit={unit}
           onUnit={setUnit}

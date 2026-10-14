@@ -546,7 +546,7 @@ const en = {
   irPrice: {
     title: "Iranian price board",
     description:
-      "Every Iranian exchange and rate source on one board: order books from Nobitex, Wallex, Bitpin and Tabdeal kept live over their own websockets, Wallex's full Toman market list, and the nerkh.io gold, coin, currency and crypto rates. Filter by source, group by category, and switch between Rial and Toman.",
+      "Every Iranian exchange and rate source on one board: Tether order books from Nobitex, Wallex, Bitpin and Tabdeal kept live over their own websockets, Wallex's full Toman market list, and the seven reference rates (Tether, dollar, 18k/24k gold, full/half/quarter coins) from nerkh.io and TGJU with every Iranian exchange's Tether line. Filter by source, group by category, priced in Toman.",
     lastUpdate: "last update",
     websocketLive: "websocket live",
     restOnly: "rest refresh only",
@@ -559,13 +559,16 @@ const en = {
     nerkhErrorTitle: "Could not load the nerkh.io rates",
     nerkhError:
       "The nerkh.io live endpoint did not respond, so its rows are missing from the board.",
+    tgjuErrorTitle: "Could not load the TGJU rates",
+    tgjuError:
+      "The tgju.org boards did not respond, so its rows are missing from the board.",
     empty: "No prices were returned by any source.",
     noMatch: "No instrument matches the current source and category filters.",
     unitHint:
       "All prices are shown in %s. Each source quotes in its own unit and is normalised before display.",
     poll: {
       cadence: "crawled every 60s",
-      hint: "Nobitex, Wallex, Bitpin and Tabdeal push their order books over a websocket, so their prices are already current. nerkh.io and the Wallex market list have no stream, so they are crawled every 60 seconds, and they are the only sources the refresh button re-crawls.",
+      hint: "Nobitex, Wallex, Bitpin and Tabdeal push their order books over a websocket, so their prices are already current. nerkh.io, TGJU and the Wallex market list have no stream, so they are crawled every 60 seconds, and they are the only sources the refresh button re-crawls.",
     },
     sourceTag: {
       aggregator: "rate",
@@ -705,6 +708,11 @@ const en = {
       DOT: "Polkadot",
       DASH: "Dash",
     },
+  },
+
+  tgju: {
+    staleWarning:
+      "Cached snapshot — tgju.org did not respond on the last attempt.",
   },
 
   analyze: {
@@ -1073,7 +1081,8 @@ const en = {
     exploitCount: "Recorded exploits",
     bridgeExploits: "Bridge exploits",
     netOfReturns: "Net of returned funds",
-    tvlNote: "TVL to market cap above 1 means the protocol holds more than its own token is worth.",
+    tvlNote:
+      "TVL to market cap above 1 means the protocol holds more than its own token is worth.",
     stablecoinNote:
       "Supply growth leads deployment: new stablecoins are minted onto a chain before the capital there is put to work.",
     reservesNote:

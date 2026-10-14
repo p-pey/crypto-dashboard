@@ -414,7 +414,9 @@ function TradeCell({
   const { t } = useI18n();
   // Reference-only instruments have no venue market and therefore no order to
   // send, so the cell explains that instead of offering a button that fails.
-  if (row.assetId === "gold18k" || row.symbol === null) {
+  // That covers every aggregator row (nerkh.io, TGJU) as well as book rows
+  // without a symbol: none of them maps onto a tradeable venue market.
+  if (row.source === "nerkh" || row.source === "tgju" || row.symbol === null) {
     return (
       <Tooltip title={t("trading.ticket.noTradeable")}>
         <span className="text-fg-3 text-[10px] whitespace-nowrap">
